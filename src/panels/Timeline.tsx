@@ -1,10 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { dataset, dayMs } from '../data/dataset'
 import { fmtDT, fmtDur } from '../lib/format'
 import { C, FONT } from '../lib/theme'
 import { isVisible, type Body } from '../lib/visibility'
 import { useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
+import Tooltip, { type TipState } from './Tooltip'
+
+/** Mission hours shown per second of playback at 1x. */
+const HOURS_PER_SECOND = 24
 
 const ROWS: [string, Body, string, number][] = [
   ['Sun', 'sun', C.sun, 4],
@@ -29,12 +33,29 @@ export default function Timeline() {
   const s0 = landingDay * 24
   const dragging = useRef(false)
 
-  // Playback: 2 mission hours per 40 ms tick, looping.
+  const speed = useStore((s) => s.speed)
+  const cycleSpeed = useStore((s) => s.cycleSpeed)
+  const [tip, setTip] = useState<TipState | null>(null)
+
+  // Playback on the display's own frame clock, looping at the end of the mission.
   useEffect(() => {
     if (!playing) return
-    const id = setInterval(() => useStore.setState((s) => ({ t: (s.t + 2) % (s.missionLength * 24) })), 40)
-    return () => clearInterval(id)
-  }, [playing])
+    let raf = 0
+    let last = performance.now()
+    let acc = 0
+    const tick = (now: number) => {
+      acc += (Math.min(now - last, 100) / 1000) * HOURS_PER_SECOND * speed
+      last = now
+      const whole = Math.floor(acc)
+      if (whole > 0) {
+        acc -= whole
+        useStore.setState((s) => ({ t: (s.t + whole) % (s.missionLength * 24) }))
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [playing, speed])
 
   const ref = useCanvas(H, (g, w) => {
     const pw = w - LABEL_W - 8
@@ -86,13 +107,35 @@ export default function Timeline() {
     g.fill()
   })
 
-  const scrubTo = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const hourAt = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const r = e.currentTarget.getBoundingClientRect()
-    setT(Math.floor(((e.clientX - r.left - LABEL_W) / (r.width - LABEL_W - 8)) * n))
+    return Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - r.left - LABEL_W) / (r.width - LABEL_W - 8)) * n)))
+  }
+  const scrubTo = (e: React.PointerEvent<HTMLCanvasElement>) => setT(hourAt(e))
+  const showTip = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const h = hourAt(e)
+    const i = Math.min(s0 + h, d.sun.el.length - 1)
+    setTip({
+      x: e.clientX,
+      y: e.clientY - 96,
+      content: (
+        <>
+          <b>{fmtDT(dayMs(landingDay) + h * 36e5)}</b>
+          <br />
+          <span className={isVisible(d, 'sun', i) ? 'text-sun' : 'text-bad'}>
+            Sun {isVisible(d, 'sun', i) ? 'in view' : 'behind terrain'}
+          </span>
+          <br />
+          <span className={isVisible(d, 'earth', i) ? 'text-earth' : 'text-bad'}>
+            Earth {isVisible(d, 'earth', i) ? 'in view' : 'behind terrain'}
+          </span>
+        </>
+      ),
+    })
   }
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-4">
       <button className="play" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay}>
         <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
           {playing ? (
@@ -105,6 +148,9 @@ export default function Timeline() {
           )}
         </svg>
       </button>
+      <button className="speed" aria-label={`Playback speed ${speed} times. Change speed`} onClick={cycleSpeed}>
+        {speed}×
+      </button>
       <div className="min-w-0 flex-1">
         <canvas
           ref={ref}
@@ -116,7 +162,11 @@ export default function Timeline() {
             e.currentTarget.setPointerCapture(e.pointerId)
             scrubTo(e)
           }}
-          onPointerMove={(e) => dragging.current && scrubTo(e)}
+          onPointerMove={(e) => {
+            if (dragging.current) scrubTo(e)
+            if (e.pointerType === 'mouse') showTip(e)
+          }}
+          onPointerLeave={() => setTip(null)}
           onPointerUp={() => (dragging.current = false)}
           onPointerCancel={() => (dragging.current = false)}
         />
@@ -136,6 +186,7 @@ export default function Timeline() {
         <div className="text-[15px]">{fmtDT(dayMs(landingDay) + t * 36e5).slice(0, 16)} UTC</div>
         <div className="lbl">{t === 0 ? 'Landing' : `${fmtDur(t)} after landing`}</div>
       </div>
+      <Tooltip tip={tip} />
     </div>
   )
 }

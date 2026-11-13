@@ -19,6 +19,10 @@ interface State {
   playing: boolean
   /** "Plan A" for the scenario diff. */
   pinA: Pin | null
+  /** Playback speed multiplier. */
+  speed: number
+  /** Site under the pointer in the site list, so the 3D pin can light up. */
+  hoverSite: string | null
 
   selectSite: (id: string) => void
   stepSite: (dir: 1 | -1) => void
@@ -27,6 +31,8 @@ interface State {
   setT: (t: number) => void
   stepT: (dh: number) => void
   togglePlay: () => void
+  cycleSpeed: () => void
+  setHoverSite: (id: string | null) => void
   pin: () => void
   unpin: () => void
 }
@@ -40,6 +46,8 @@ export const useStore = create<State>((set) => ({
   t: 0,
   playing: false,
   pinA: null,
+  speed: 1,
+  hoverSite: null,
 
   selectSite: (site) => set({ site }),
   stepSite: (dir) =>
@@ -53,6 +61,8 @@ export const useStore = create<State>((set) => ({
   setT: (t) => set((s) => ({ t: Math.max(0, Math.min(lastHour(s.missionLength), Math.round(t))) })),
   stepT: (dh) => set((s) => ({ t: Math.max(0, Math.min(lastHour(s.missionLength), s.t + dh)) })),
   togglePlay: () => set((s) => ({ playing: !s.playing })),
+  cycleSpeed: () => set((s) => ({ speed: s.speed >= 4 ? 1 : s.speed * 2 })),
+  setHoverSite: (hoverSite) => set({ hoverSite }),
   pin: () => set((s) => ({ pinA: { site: s.site, landingDay: s.landingDay, missionLength: s.missionLength } })),
   unpin: () => set({ pinA: null }),
 }))

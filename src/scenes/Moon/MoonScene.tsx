@@ -1,12 +1,14 @@
 /**
  * Scene 1: the 3D Moon explorer (PLAN.md §3, milestone M2).
  * The Sun light, the Earth marker and both sight lines come from the selected site's
- * Sun / Earth azimuth and elevation at the store's time.
+ * Sun / Earth azimuth and elevation at the store's time. Everything eases towards its
+ * new place, so changing site, date or time never snaps.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Html, Line, OrbitControls, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
+import type { Line2 } from 'three-stdlib'
 import { dataset, siteById } from '../../data/dataset'
 import { C } from '../../lib/theme'
 import { earthVisible, sunVisible } from '../../lib/visibility'
@@ -24,14 +26,16 @@ const LIFT = 1.006
 const SIGHT = 1.35
 
 const v3 = (a: readonly number[]) => new THREE.Vector3(a[0], a[1], a[2])
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-function Moon() {
+function Moon({ onReady }: { onReady: () => void }) {
   const [color, ldem] = useTexture([`${BASE}textures/moon_color_4k.jpg`, `${BASE}textures/moon_ldem_4.png`])
   const gl = useThree((s) => s.gl)
   useMemo(() => {
     color.colorSpace = THREE.SRGBColorSpace
     color.anisotropy = gl.capabilities.getMaxAnisotropy()
   }, [color, gl])
+  useEffect(onReady, [onReady])
   return (
     <mesh>
       <sphereGeometry args={[1, 360, 180]} />
@@ -51,18 +55,19 @@ function Moon() {
 }
 
 /** Keeps its children the same size on screen whatever the zoom. */
-function ScreenScale({ position, k = 0.011, children }: { position: THREE.Vector3; k?: number; children: ReactNode }) {
+function ScreenScale({ k = 0.011, children }: { k?: number; children: ReactNode }) {
   const ref = useRef<THREE.Group>(null)
-  useFrame(({ camera }) => ref.current?.scale.setScalar(camera.position.distanceTo(position) * k))
-  return (
-    <group ref={ref} position={position}>
-      {children}
-    </group>
-  )
+  const world = useMemo(() => new THREE.Vector3(), [])
+  useFrame(({ camera }) => {
+    const g = ref.current
+    if (g) g.scale.setScalar(camera.position.distanceTo(g.getWorldPosition(world)) * k)
+  })
+  return <group ref={ref}>{children}</group>
 }
 
 function Pins() {
   const site = useStore((s) => s.site)
+  const listHover = useStore((s) => s.hoverSite)
   const selectSite = useStore((s) => s.selectSite)
   const [hover, setHover] = useState<string | null>(null)
   const { gl } = useThree()
@@ -71,69 +76,50 @@ function Pins() {
     <>
       {dataset.sites.map((s) => {
         const up = v3(sitePosition(s.lat, s.lon))
-        const pos = up.clone().multiplyScalar(LIFT)
         const on = s.id === site
+        const hot = hover === s.id || listHover === s.id
         const facing = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), up)
         return (
-          <ScreenScale key={s.id} position={pos}>
-            <mesh
-              onClick={(e) => {
-                e.stopPropagation()
-                selectSite(s.id)
-              }}
-              onPointerOver={(e) => {
-                e.stopPropagation()
-                setHover(s.id)
-                gl.domElement.style.cursor = 'pointer'
-              }}
-              onPointerOut={() => {
-                setHover(null)
-                gl.domElement.style.cursor = ''
-              }}
-            >
-              {/* Generous invisible hit target around the dot. */}
-              <sphereGeometry args={[1.6, 12, 12]} />
-              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-            </mesh>
-            <mesh>
-              <sphereGeometry args={[on ? 0.5 : 0.36, 16, 16]} />
-              <meshBasicMaterial color={on ? C.text : '#bdb9b1'} />
-            </mesh>
-            {on && (
-              <mesh quaternion={facing}>
-                <ringGeometry args={[1.2, 1.36, 48]} />
-                <meshBasicMaterial color={C.text} side={THREE.DoubleSide} />
+          <group key={s.id} position={up.clone().multiplyScalar(LIFT)}>
+            <ScreenScale>
+              <mesh
+                onClick={(e) => {
+                  e.stopPropagation()
+                  selectSite(s.id)
+                }}
+                onPointerOver={(e) => {
+                  e.stopPropagation()
+                  setHover(s.id)
+                  gl.domElement.style.cursor = 'pointer'
+                }}
+                onPointerOut={() => {
+                  setHover(null)
+                  gl.domElement.style.cursor = ''
+                }}
+              >
+                {/* Generous invisible hit target around the dot. */}
+                <sphereGeometry args={[1.6, 12, 12]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
               </mesh>
-            )}
-            {(on || hover === s.id) && (
-              <Html position={[0, 0, 0]} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
-                <div className={`pin-label${on ? ' on' : ''}`}>{s.name}</div>
-              </Html>
-            )}
-          </ScreenScale>
+              <mesh scale={on ? 0.5 : hot ? 0.5 : 0.36}>
+                <sphereGeometry args={[1, 16, 16]} />
+                <meshBasicMaterial color={on || hot ? C.text : '#bdb9b1'} />
+              </mesh>
+              {(on || hot) && (
+                <mesh quaternion={facing}>
+                  <ringGeometry args={[1.2, on ? 1.36 : 1.28, 48]} />
+                  <meshBasicMaterial color={C.text} side={THREE.DoubleSide} transparent opacity={on ? 1 : 0.6} />
+                </mesh>
+              )}
+              {(on || hot) && (
+                <Html zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+                  <div className={`pin-label${on ? ' on' : ''}`}>{s.name}</div>
+                </Html>
+              )}
+            </ScreenScale>
+          </group>
         )
       })}
-    </>
-  )
-}
-
-function SightLine({ from, to, colour, clear, label }: { from: THREE.Vector3; to: THREE.Vector3; colour: string; clear: boolean; label: string }) {
-  const mid = from.clone().lerp(to, 0.5)
-  return (
-    <>
-      <Line
-        points={[from, to]}
-        color={clear ? colour : C.bad}
-        lineWidth={clear ? 1.8 : 1.5}
-        dashed={!clear}
-        dashSize={0.045}
-        gapSize={0.035}
-      />
-      <Html position={clear ? to : mid} zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
-        <div className={`los-label${clear ? '' : ' blocked'}`} style={clear ? { color: colour } : undefined}>
-          {clear ? label : `${label} blocked by terrain`}
-        </div>
-      </Html>
     </>
   )
 }
@@ -143,33 +129,107 @@ function Sky() {
   const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
   const t = useStore((s) => s.t)
+  const invalidate = useThree((s) => s.invalidate)
   const s = siteById(site)
   const d = dataset.bySite[site]
   const i = Math.min(landingDay * 24 + t, d.sun.el.length - 1)
+  const sunClear = sunVisible(d, i)
+  const earthClear = earthVisible(d, i)
 
-  const from = v3(sitePosition(s.lat, s.lon)).multiplyScalar(LIFT)
-  const sunDir = v3(skyDirection(s.lat, s.lon, d.sun.az[i], d.sun.el[i]))
-  const earthDir = v3(skyDirection(s.lat, s.lon, d.earth.az[i], d.earth.el[i]))
-  const sunEnd = from.clone().addScaledVector(sunDir, SIGHT)
-  const earthEnd = from.clone().addScaledVector(earthDir, SIGHT)
+  // Where things should be now. The frame loop eases the drawn state towards this.
+  const target = useRef({ from: new THREE.Vector3(), sun: new THREE.Vector3(), earth: new THREE.Vector3() })
+  target.current.from.copy(v3(sitePosition(s.lat, s.lon))).multiplyScalar(LIFT)
+  target.current.sun.copy(v3(skyDirection(s.lat, s.lon, d.sun.az[i], d.sun.el[i])))
+  target.current.earth.copy(v3(skyDirection(s.lat, s.lon, d.earth.az[i], d.earth.el[i])))
+  const cur = useRef<typeof target.current | null>(null)
 
+  const light = useRef<THREE.DirectionalLight>(null)
+  const sunLine = useRef<Line2>(null)
+  const earthLine = useRef<Line2>(null)
+  const sunEnd = useRef<THREE.Group>(null)
+  const earthEnd = useRef<THREE.Group>(null)
+  const sunMid = useRef<THREE.Group>(null)
+  const earthMid = useRef<THREE.Group>(null)
+  const tmp = useMemo(() => ({ a: new THREE.Vector3(), b: new THREE.Vector3() }), [])
+
+  useEffect(() => invalidate(), [site, i, invalidate])
+
+  useFrame((_, dt) => {
+    const to = target.current
+    if (!cur.current) cur.current = { from: to.from.clone(), sun: to.sun.clone(), earth: to.earth.clone() }
+    const c = cur.current
+    const k = reducedMotion() ? 1 : 1 - Math.exp(-Math.min(dt, 1 / 30) * 9)
+    c.from.lerp(to.from, k)
+    c.sun.lerp(to.sun, k).normalize()
+    c.earth.lerp(to.earth, k).normalize()
+
+    light.current?.position.copy(c.sun).multiplyScalar(50)
+    const place = (dir: THREE.Vector3, line: Line2 | null, end: THREE.Group | null, mid: THREE.Group | null) => {
+      tmp.a.copy(c.from)
+      tmp.b.copy(c.from).addScaledVector(dir, SIGHT)
+      if (line) {
+        line.geometry.setPositions([tmp.a.x, tmp.a.y, tmp.a.z, tmp.b.x, tmp.b.y, tmp.b.z])
+        line.computeLineDistances()
+      }
+      end?.position.copy(tmp.b)
+      mid?.position.copy(tmp.a).lerp(tmp.b, 0.5)
+    }
+    place(c.sun, sunLine.current, sunEnd.current, sunMid.current)
+    place(c.earth, earthLine.current, earthEnd.current, earthMid.current)
+
+    const settled =
+      c.from.distanceToSquared(to.from) < 1e-9 && c.sun.distanceToSquared(to.sun) < 1e-9 && c.earth.distanceToSquared(to.earth) < 1e-9
+    if (!settled) invalidate()
+  })
+
+  const O: [number, number, number][] = [[0, 0, 0], [0, 0, 1]]
   return (
     <>
       <ambientLight intensity={0.035} />
-      <directionalLight position={sunDir.clone().multiplyScalar(50)} intensity={3.4} />
-      <SightLine from={from} to={sunEnd} colour={C.sun} clear={sunVisible(d, i)} label="Sun" />
-      <SightLine from={from} to={earthEnd} colour={C.earth} clear={earthVisible(d, i)} label="Earth" />
-      <ScreenScale position={sunEnd} k={0.012}>
-        <mesh>
-          <sphereGeometry args={[1, 16, 16]} />
-          <meshBasicMaterial color={C.sun} />
-        </mesh>
-      </ScreenScale>
+      <directionalLight ref={light} intensity={3.4} />
+
+      <Line ref={sunLine} points={O} color={sunClear ? C.sun : C.bad} lineWidth={sunClear ? 1.8 : 1.5} dashed={!sunClear} dashSize={0.045} gapSize={0.035} />
+      <Line ref={earthLine} points={O} color={earthClear ? C.earth : C.bad} lineWidth={earthClear ? 1.8 : 1.5} dashed={!earthClear} dashSize={0.045} gapSize={0.035} />
+
+      <group ref={sunEnd}>
+        <ScreenScale k={0.012}>
+          <mesh>
+            <sphereGeometry args={[1, 16, 16]} />
+            <meshBasicMaterial color={C.sun} />
+          </mesh>
+        </ScreenScale>
+        {sunClear && (
+          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+            <div className="los-label" style={{ color: C.sun }}>Sun</div>
+          </Html>
+        )}
+      </group>
       {/* Earth is drawn in the right direction but much closer and larger than reality. */}
-      <mesh position={earthEnd}>
-        <sphereGeometry args={[0.06, 32, 32]} />
-        <meshStandardMaterial color={C.earth} roughness={0.9} />
-      </mesh>
+      <group ref={earthEnd}>
+        <mesh>
+          <sphereGeometry args={[0.06, 32, 32]} />
+          <meshStandardMaterial color={C.earth} roughness={0.9} />
+        </mesh>
+        {earthClear && (
+          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+            <div className="los-label" style={{ color: C.earth }}>Earth</div>
+          </Html>
+        )}
+      </group>
+      <group ref={sunMid}>
+        {!sunClear && (
+          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+            <div className="los-label blocked">Sun blocked by terrain</div>
+          </Html>
+        )}
+      </group>
+      <group ref={earthMid}>
+        {!earthClear && (
+          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+            <div className="los-label blocked">Earth blocked by terrain</div>
+          </Html>
+        )}
+      </group>
     </>
   )
 }
@@ -191,12 +251,15 @@ function CameraRig({ recentre }: { recentre: number }) {
     const s = siteById(site)
     const dist = first.current ? 4.7 : THREE.MathUtils.clamp(camera.position.length(), 1.6, 5.5)
     const spot = cameraSpot(s.lat, s.lon, dist)
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (first.current || reduce) {
+    if (reducedMotion()) {
       camera.position.copy(spot)
       camera.lookAt(0, 0, 0)
       target.current = null
-    } else target.current = spot
+    } else {
+      // Opening move: start a little further out and settle in.
+      if (first.current) camera.position.copy(spot).multiplyScalar(1.22)
+      target.current = spot
+    }
     first.current = false
     invalidate()
   }, [site, recentre, camera, invalidate])
@@ -204,11 +267,11 @@ function CameraRig({ recentre }: { recentre: number }) {
   useFrame((_, dt) => {
     const to = target.current
     if (!to) return
-    const k = 1 - Math.exp(-dt * 5)
+    const k = 1 - Math.exp(-Math.min(dt, 1 / 30) * 3.2)
     const len = THREE.MathUtils.lerp(camera.position.length(), to.length(), k)
     camera.position.lerp(to, k).setLength(len)
     camera.lookAt(0, 0, 0)
-    if (camera.position.distanceTo(to) < 0.004) target.current = null
+    if (camera.position.distanceTo(to) < 0.003) target.current = null
     invalidate()
   })
 
@@ -216,7 +279,7 @@ function CameraRig({ recentre }: { recentre: number }) {
     <OrbitControls
       enablePan={false}
       enableDamping
-      dampingFactor={0.12}
+      dampingFactor={0.1}
       rotateSpeed={0.5}
       zoomSpeed={0.7}
       minDistance={1.12}
@@ -228,18 +291,18 @@ function CameraRig({ recentre }: { recentre: number }) {
   )
 }
 
-export default function MoonScene({ recentre }: { recentre: number }) {
+export default function MoonScene({ recentre, onReady }: { recentre: number; onReady: () => void }) {
   return (
     <Canvas
       frameloop="demand"
       dpr={[1, 2]}
-      camera={{ fov: 32, near: 0.01, far: 100, position: [0, -4.7, 0.01] }}
+      camera={{ fov: 32, near: 0.01, far: 100, position: [0, -5.7, 0.01] }}
       gl={{ antialias: true }}
       onCreated={({ gl }) => gl.setClearColor('#000000')}
       aria-label="3D Moon with site pins and Sun and Earth sight lines"
       role="img"
     >
-      <Moon />
+      <Moon onReady={onReady} />
       <Pins />
       <Sky />
       <CameraRig recentre={recentre} />

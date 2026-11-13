@@ -11,7 +11,7 @@ A web app to compare lunar landing sites and dates in seconds. It shows Sun (pow
 - Only build features listed in `PLAN.md` §3. If something seems missing, ask before adding scope.
 - Original 3D models only (the rocket is built from primitives). NASA public-domain textures for the Earth and Moon; record every asset URL in `SOURCES.md`.
 - The intro must be skippable from frame 1 and respect `prefers-reduced-motion`.
-- Keep the visual language of `reference/prototype.html`: dark greyscale UI, with colour only for meaning (Sun #F5A524, Earth #60A5FA, OK #22C55E, blocked #EF4444).
+- Visual language (updated 2026-11-13 after design feedback; supersedes the prototype's look and PLAN.md §8 fonts/colours): the 3D Moon fills the first screen on black with one plain-language verdict; detail panels sit below the fold. Warm neutral greys, one typeface (Instrument Sans), sentence case, no boxed dashboards. Colour only for meaning, in softened tones (Sun #EFB54F, Earth #82B4E8, good #6CBF90, blocked #DB6450); tokens live in `src/index.css`. `reference/prototype.html` remains the reference for behaviour and data shape, not for styling.
 - Wrap localStorage in try/catch. The app must work if storage is unavailable.
 
 ## Stack
@@ -24,7 +24,7 @@ Vite + React + TypeScript · React Three Fiber + drei · Zustand · Tailwind · 
 /public/data/               # generated JSON consumed by the app
 /src/scenes/Intro/          # Scene 0 cinematic
 /src/scenes/Moon/           # Scene 1 3D explorer
-/src/panels/                # slip grid, sky view, timeline, countdowns, diff, explain
+/src/panels/                # hero (verdict + sites + timeline), slip grid, sky view, diff, explain, data notes
 /src/state/store.ts         # Zustand: site, landingDay, missionLength, t, pinA
 /src/lib/visibility.ts      # horizon interpolation, window stats, next-flip countdowns
 ```

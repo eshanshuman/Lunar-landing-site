@@ -21,7 +21,7 @@ export default function SlipGrid() {
   )
 
   return (
-    <section className="card">
+    <section className="card" id="slip">
       <h2>
         What if we slip?
         <span className="sub">
@@ -68,10 +68,12 @@ export default function SlipGrid() {
             })}
           </div>
         ))}
-        <div />
+        <div className="cl" style={{ textAlign: 'left' }}>
+          Landing day, {new Date(dayMs(0)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' })}
+        </div>
         {DAYS.map((d) => (
-          <div key={d} className="cl">
-            {d % 3 === 0 ? new Date(dayMs(d)).getUTCDate() : ''}
+          <div key={d} className={`cl${d === landingDay ? ' on' : ''}`}>
+            {d % 3 === 0 || d === landingDay ? new Date(dayMs(d)).getUTCDate() : ''}
           </div>
         ))}
       </div>

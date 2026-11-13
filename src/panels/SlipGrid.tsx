@@ -23,12 +23,14 @@ export default function SlipGrid() {
   return (
     <section className="card">
       <h2>
-        Slip grid{' '}
-        <span className="sub">rows = sites · columns = landing date · colour = sunlight + Earth contact over the mission</span>
+        What if we slip?
+        <span className="sub">
+          Every site against every landing date, for a {missionLength}-day mission. Pick a square to load it.
+        </span>
       </h2>
       {/* Scrolls sideways on narrow screens instead of widening the page. Padding keeps the selection outline unclipped. */}
       <div className="-m-1 overflow-x-auto p-1">
-      <div className="grid-slip" style={{ gridTemplateColumns: `minmax(96px, 150px) repeat(${dataset.days}, minmax(14px, 1fr))` }}>
+      <div className="grid-slip" style={{ gridTemplateColumns: `minmax(96px, 160px) repeat(${dataset.days}, minmax(14px, 1fr))` }}>
         {dataset.sites.map((s, r) => (
           <div key={s.id} className="contents">
             <div className={`rl${s.id === site ? ' on' : ''}`}>{s.name}</div>
@@ -74,10 +76,10 @@ export default function SlipGrid() {
         ))}
       </div>
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-3.5 text-xs text-muted">
-        <span><span className="sw g2" />Sunlight and Earth contact both ≥ 75% of the time</span>
-        <span><span className="sw g1" />One of them below 75%</span>
-        <span><span className="sw g0" />Both below 75%</span>
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-muted">
+        <span><span className="sw g2" />Sunlight and Earth link both at least 75% of the time</span>
+        <span><span className="sw g1" />One falls short</span>
+        <span><span className="sw g0" />Both fall short</span>
       </div>
       <Tooltip tip={tip} />
     </section>

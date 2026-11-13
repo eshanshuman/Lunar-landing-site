@@ -23,8 +23,8 @@ export default function Explain() {
   for (let a = 1; a < 360; a++) if (hits[a] > hits[best]) best = a
 
   return (
-    <section className="card">
-      <h2>Why</h2>
+    <section className="card aside">
+      <h2>Why this result</h2>
       <div className="explain">
         At <b>{siteById(site).name}</b> the Sun never climbs above <b>{maxSun.toFixed(1)}°</b> during this window.{' '}
         {st.maxDark > 0 ? (

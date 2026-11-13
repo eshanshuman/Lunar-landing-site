@@ -12,10 +12,11 @@ comms) are relative to the terrain horizon. Theme: **"What if we slip?"**
 |---|---|
 | M0 Scaffold | Done |
 | M1 2D panels on sample data | Done |
-| M2 3D Moon explorer | Next (placeholder in the layout) |
+| M2 3D Moon explorer | Done: globe, Sun lighting from the store's time, site pins, Earth marker, sight lines |
+| M3 Real data swap | Next, needs pipeline output |
 | P1 Pipeline v1 | Skeletons written; not yet run on real data (see `pipeline/README.md`) |
 
-**All numbers in the app are currently synthetic** (`src/data/sample.ts`) and the header shows a
+The Moon imagery is real NASA data. **All numbers in the app are currently synthetic** (`src/data/sample.ts`) and the header shows a
 "Sample data" badge. Site coordinates are unverified. See `SOURCES.md`.
 
 ## Run
@@ -39,8 +40,10 @@ reference/prototype.html   approved visual prototype (do not edit)
 src/data/                  sample.ts (synthetic) and dataset.ts (the one data entry point)
 src/lib/visibility.ts      skyline interpolation, window stats, rise/set countdowns (unit-tested)
 src/state/store.ts         Zustand: site, landingDay, missionLength, t, pinA
-src/panels/                sites, sky view, timeline, slip grid, right now, scenario diff, why
-src/scenes/                Intro (M4) and Moon (M2)
+src/panels/                top bar, site evaluation, timeline, slip grid, sky view, scenario diff, why, data provenance
+src/scenes/Moon/           3D Moon explorer (geo.ts holds the lat/lon and sky-direction maths, unit-tested)
+src/scenes/Intro/          intro cinematic (M4, not built)
+public/textures/           NASA SVS CGI Moon Kit maps (see SOURCES.md)
 pipeline/                  Python data pipeline
 public/data/               generated JSON consumed by the app (empty until the pipeline runs)
 ```

@@ -51,7 +51,7 @@ export default function ScenarioDiff() {
   if (!pinA) {
     body = (
       <p className="note">
-        Pin the current choice as plan A, then click any other cell in the slip grid to see exactly what changes.
+        Pin the current choice as plan A, then pick any other square to see exactly what changes.
       </p>
     )
   } else {
@@ -76,10 +76,10 @@ export default function ScenarioDiff() {
   }
 
   return (
-    <section className="card">
-      <h2>Scenario diff</h2>
+    <section className="card aside">
+      <h2>Compare two plans</h2>
       <div aria-live="polite">{body}</div>
-      <div className="mt-2.5 flex gap-2">
+      <div className="mt-4 flex gap-2">
         {pinA ? (
           <>
             <button className="btn" onClick={pin}>Re-pin here</button>

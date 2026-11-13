@@ -1,16 +1,21 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { dataset, dayMs } from '../data/dataset'
-import { fmtDT, pct } from '../lib/format'
-import { C } from '../lib/theme'
-import { isVisible, windowStats, type Body } from '../lib/visibility'
+import { fmtDT, fmtDur } from '../lib/format'
+import { C, FONT } from '../lib/theme'
+import { isVisible, type Body } from '../lib/visibility'
 import { useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 
 const ROWS: [string, Body, string, number][] = [
-  ['Sunlight', 'sun', C.sun, 6],
-  ['Earth', 'earth', C.earth, 34],
+  ['Sun', 'sun', C.sun, 4],
+  ['Earth', 'earth', C.earth, 20],
 ]
+const BAR_H = 8
+const H = 56
+const LABEL_W = 52
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+/** Two thin bars: where the Sun and Earth are in view over the mission. Gaps are terrain blocking them. */
 export default function Timeline() {
   const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
@@ -22,73 +27,115 @@ export default function Timeline() {
   const d = dataset.bySite[site]
   const n = missionLength * 24
   const s0 = landingDay * 24
-  const st = windowStats(d, s0, n)
+  const dragging = useRef(false)
 
-  // Playback: 2 mission hours per 40 ms tick, looping (same pace as the prototype).
+  // Playback: 2 mission hours per 40 ms tick, looping.
   useEffect(() => {
     if (!playing) return
     const id = setInterval(() => useStore.setState((s) => ({ t: (s.t + 2) % (s.missionLength * 24) })), 40)
     return () => clearInterval(id)
   }, [playing])
 
-  const ref = useCanvas(74, (g, w) => {
-    const L = 60
-    const pw = w - L - 4
-    const rowH = 20
-    g.font = '12px Inter, sans-serif'
+  const ref = useCanvas(H, (g, w) => {
+    const pw = w - LABEL_W - 8
+    const X = (h: number) => LABEL_W + (h / n) * pw
+
     g.textBaseline = 'middle'
-    g.textAlign = 'left'
     for (const [name, which, col, y] of ROWS) {
+      g.textAlign = 'left'
       g.fillStyle = C.muted
-      g.fillText(name, 0, y + rowH / 2)
-      for (let k = 0; k < n; k++) {
-        g.fillStyle = isVisible(d, which, s0 + k) ? col : '#4a1e1e'
-        g.fillRect(L + (k / n) * pw, y, pw / n + 0.6, rowH)
+      g.font = `13px ${FONT}`
+      g.fillText(name, 0, y + BAR_H / 2 + 1)
+      g.fillStyle = 'rgba(255,255,255,0.1)'
+      g.beginPath()
+      g.roundRect(X(0), y + 3, pw, 2, 1)
+      g.fill()
+      // Runs of consecutive hours in view
+      let k = 0
+      while (k < n) {
+        if (!isVisible(d, which, s0 + k)) {
+          k++
+          continue
+        }
+        let e = k
+        while (e < n && isVisible(d, which, s0 + e)) e++
+        g.fillStyle = col
+        g.beginPath()
+        g.roundRect(X(k), y, Math.max(2, X(e) - X(k)), BAR_H, 4)
+        g.fill()
+        k = e
       }
     }
-    g.font = '10px "JetBrains Mono", monospace'
+
+    // Day ticks with dates
+    const every = Math.max(1, Math.ceil(60 / (pw / missionLength)))
+    g.font = `12px ${FONT}`
     g.fillStyle = C.dim
-    g.textAlign = 'center'
-    for (let dd = 0; dd <= missionLength; dd += missionLength > 7 ? 2 : 1) g.fillText(`D${dd}`, L + ((dd * 24) / n) * pw, 66)
+    for (let day = 0; day < missionLength; day += every) {
+      const date = new Date(dayMs(landingDay + day))
+      g.textAlign = day === 0 ? 'left' : 'center'
+      g.fillText(`${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`, X(day * 24), 46)
+    }
+
+    // Playhead
+    const x = X(t + 0.5)
     g.fillStyle = C.text
-    g.fillRect(L + (t / n) * pw - 1, 2, 2, 54)
+    g.fillRect(x - 0.75, 0, 1.5, 32)
+    g.beginPath()
+    g.arc(x, 32, 4, 0, 7)
+    g.fill()
   })
 
+  const scrubTo = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    setT(Math.floor(((e.clientX - r.left - LABEL_W) / (r.width - LABEL_W - 8)) * n))
+  }
+
   return (
-    <section className="card">
-      <h2>
-        Mission timeline{' '}
-        <span className="sub">
-          sunlight {pct(st.sunF)}% · Earth contact {pct(st.earthF)}% · longest dark {st.maxDark} h · longest Earth gap{' '}
-          {st.maxGap} h
-        </span>
-      </h2>
-      <div className="mb-2 flex items-center gap-3">
-        <button className="play" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay}>
-          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-            {playing ? (
-              <>
-                <rect x="3" y="2" width="3" height="10" fill={C.text} />
-                <rect x="8" y="2" width="3" height="10" fill={C.text} />
-              </>
-            ) : (
-              <path d="M3 1.5v11l9-5.5z" fill={C.text} />
-            )}
-          </svg>
-        </button>
+    <div className="flex items-center gap-5">
+      <button className="play" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay}>
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+          {playing ? (
+            <>
+              <rect x="3" y="2" width="3" height="10" fill={C.text} />
+              <rect x="8" y="2" width="3" height="10" fill={C.text} />
+            </>
+          ) : (
+            <path d="M3.5 1.5v11l9-5.5z" fill={C.text} />
+          )}
+        </svg>
+      </button>
+      <div className="min-w-0 flex-1">
+        <canvas
+          ref={ref}
+          style={{ height: H, cursor: 'ew-resize', touchAction: 'pan-y' }}
+          role="img"
+          aria-label="When the Sun and Earth are in view over the mission. Drag to change the time."
+          onPointerDown={(e) => {
+            dragging.current = true
+            e.currentTarget.setPointerCapture(e.pointerId)
+            scrubTo(e)
+          }}
+          onPointerMove={(e) => dragging.current && scrubTo(e)}
+          onPointerUp={() => (dragging.current = false)}
+          onPointerCancel={() => (dragging.current = false)}
+        />
+        {/* Keyboard and screen-reader route to the same value as dragging the bars. */}
         <input
-          className="min-w-0 flex-1"
+          className="sr-only-range"
           type="range"
           min={0}
           max={n - 1}
           value={t}
           aria-label="Time in mission"
-          aria-valuetext={`${t} h after landing`}
+          aria-valuetext={`${fmtDur(t)} after landing`}
           onChange={(e) => setT(+e.target.value)}
         />
-        <span className="clock">{fmtDT(dayMs(landingDay) + t * 36e5)}</span>
       </div>
-      <canvas ref={ref} style={{ height: 74 }} role="img" aria-label="Sunlight and Earth contact over the mission" />
-    </section>
+      <div className="hidden w-[190px] flex-none whitespace-nowrap text-right sm:block">
+        <div className="text-[15px]">{fmtDT(dayMs(landingDay) + t * 36e5).slice(0, 16)} UTC</div>
+        <div className="lbl">{t === 0 ? 'Landing' : `${fmtDur(t)} after landing`}</div>
+      </div>
+    </div>
   )
 }

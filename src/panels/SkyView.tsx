@@ -1,6 +1,6 @@
 import { dataset, dayMs, siteById } from '../data/dataset'
 import { fmtDate } from '../lib/format'
-import { C } from '../lib/theme'
+import { C, FONT } from '../lib/theme'
 import { isVisible, type Body } from '../lib/visibility'
 import { useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
@@ -15,7 +15,7 @@ export default function SkyView() {
   const t = useStore((s) => s.t)
   const d = dataset.bySite[site]
 
-  const ref = useCanvas(300, (g, w, h) => {
+  const ref = useCanvas(280, (g, w, h) => {
     const hor = d.horizon_deg
     const n = hor.length
     const s0 = landingDay * 24
@@ -42,12 +42,12 @@ export default function SkyView() {
     const Y = (el: number) => T + ((hi - el) / (hi - lo)) * ph
 
     // Elevation grid
-    g.font = '11px "JetBrains Mono", monospace'
+    g.font = `12px ${FONT}`
     g.textAlign = 'right'
     g.textBaseline = 'middle'
     const step = hi - lo > 16 ? 4 : hi - lo > 8 ? 2 : 1
     for (let e = Math.ceil(lo / step) * step; e <= hi; e += step) {
-      g.strokeStyle = e === 0 ? '#3a404a' : '#1d2128'
+      g.strokeStyle = e === 0 ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.06)'
       g.lineWidth = 1
       g.setLineDash(e === 0 ? [4, 4] : [])
       g.beginPath()
@@ -61,7 +61,7 @@ export default function SkyView() {
     g.textAlign = 'center'
     g.textBaseline = 'top'
     ;['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'].forEach((c, i) => {
-      g.fillStyle = i % 2 ? '#4b525b' : C.muted
+      g.fillStyle = i % 2 ? C.dim : C.muted
       g.fillText(c, X(i * 45), T + ph + 8)
     })
 
@@ -72,11 +72,11 @@ export default function SkyView() {
     g.lineTo(X(360), Y(lo))
     g.closePath()
     const grd = g.createLinearGradient(0, T, 0, T + ph)
-    grd.addColorStop(0, '#666B73')
-    grd.addColorStop(1, '#30343A')
+    grd.addColorStop(0, '#4a4844')
+    grd.addColorStop(1, '#1b1a19')
     g.fillStyle = grd
     g.fill()
-    g.strokeStyle = '#7B8089'
+    g.strokeStyle = '#8d8982'
     g.lineWidth = 1.2
     g.beginPath()
     for (let a = 0; a <= n; a++) {
@@ -129,20 +129,19 @@ export default function SkyView() {
   return (
     <section className="card">
       <h2>
-        Sky view{' '}
+        The sky from {siteById(site).name}
         <span className="sub">
-          {siteById(site).name} · {missionLength}-day window from {fmtDate(dayMs(landingDay))}
+          Looking all the way round the horizon. The Sun and Earth trace these paths over the {missionLength}-day mission
+          from {fmtDate(dayMs(landingDay))}; where a path dips behind the terrain, it is blocked.
         </span>
       </h2>
-      <canvas ref={ref} style={{ height: 300 }} role="img" aria-label="Sky view: terrain skyline with Sun and Earth paths" />
+      <canvas ref={ref} style={{ height: 280 }} role="img" aria-label="Sky view: terrain skyline with Sun and Earth paths" />
       <div className="legend">
         <span><i style={{ background: 'var(--color-sun)' }} />Sun path, visible</span>
         <span><i style={{ background: 'var(--color-earth)' }} />Earth path, visible</span>
         <span><i style={{ background: 'var(--color-bad)' }} />Blocked by terrain</span>
         <span><i style={{ background: 'var(--color-rock)' }} />Terrain skyline</span>
-        <span className="ml-auto text-dim">
-          Vertical scale exaggerated · no atmosphere, so the horizon is terrain + the Moon's curve
-        </span>
+        <span className="w-full text-dim">Height is stretched so small angles are visible. There is no atmosphere to bend the light.</span>
       </div>
     </section>
   )

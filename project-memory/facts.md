@@ -21,10 +21,17 @@ Every number used in the app, deck or pitch must appear here with a source, or c
   landing 2026-12-01: Connecting ridge 1, Shackleton rim 1, Peak near Shackleton 0, de Gerlache rim 6, Nobile rim 1 35;
   landing 2026-12-15: 86, 87, 85, 90, 100. Sun above the horizon 100% of both windows at the near-pole sites.
 
+## Our pipeline results (real data)
+- Terrain files used: `LDEM_80S_20MPP_ADJ` (Artemis sites) and `LDEM_60S_60MPP_ADJ` (IM-1, Chandrayaan-3). Projection verified: south polar stereographic, longitude of origin 0, sphere R = 1,737,400 m.
+- Ground heights (m above the 1,737.4 km sphere): ridge 1945.3 · shack 1738.4 (after snap to rim) · degerl 1793.8 · peak 1646.5 · nobile 5944.5 · im1 2593.0 · ch3 528.5.
+- JPL Horizons values agree with an independent DE421 + IAU Moon-orientation calculation to within 0.01° (ridge and degerl, six dates, 2027–2028). Example checks at 2027-10-20 00:00 UTC: ridge (−89.4632, 222.51°E) Sun az 79.14 el 1.61, Earth az 133.89 el 4.15; degerl (−88.6834, 292.07°E) Sun az 9.57 el 2.80, Earth az 64.41 el 5.09.
+- Sunlight 2027-10-19 → 11-02 (Sun's upper limb above the terrain skyline): ridge 92.6%, degerl 89.0%.
+
 ## Data products
-- Terrain: PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023). Cloud-optimised GeoTIFFs, south polar stereographic, MOON_ME frame of DE421, heights in metres. Files: `LDEM_80S_20MPP_ADJ`, `LDEM_80S_80MPP_ADJ`, `LDEM_60S_240MPP_ADJ`, hillshade `LDEM_80S_80MPP_ADJ_HILL`. Source: [PGDA product 90](https://pgda.gsfc.nasa.gov/products/90)
-- Ephemeris: JPL Horizons API, observer tables, `CENTER='coord@301'`, targets 10 (Sun) and 399 (Earth), `QUANTITIES='4'`.
+- Terrain: PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023). Cloud-optimised GeoTIFFs, south polar stereographic, MOON_ME frame of DE421, heights in metres. Files: `LDEM_80S_20MPP_ADJ`, `LDEM_80S_80MPP_ADJ`, `LDEM_60S_60MPP_ADJ`, `LDEM_60S_240MPP_ADJ`, hillshade `LDEM_80S_80MPP_ADJ_HILL`. Source: [PGDA product 90](https://pgda.gsfc.nasa.gov/products/90)
+- Ephemeris: JPL Horizons API, observer tables, `CENTER='coord@301'`, `COORD_TYPE='GEODETIC'`, targets 10 (Sun) and 399 (Earth), `QUANTITIES='4'`, hourly; azimuth clockwise from north.
 
 ## Unverified (do not present as fact yet)
-- The five Artemis region centre coordinates in `pipeline/sites.json` (came from another team's repo citing the NASA Lunar Surface Data Book 2025).
-- Chandrayaan-3 and Nobile `alt_km` values (see `status.md`).
+- All site coordinates in `pipeline/sites.json`; `shack` is DEM-snapped, not published. Candidate published points (check the papers): Gläser et al. 2018 Connecting Ridge C1 −89.4505°, 222.84°E and C2 −89.3157°, 245.94°E; Bussey et al. 2010, Icarus, doi:10.1016/j.icarus.2010.03.028, Points A–D (e.g. Shackleton Pt A 89.68°S 166.0°W, de Gerlache Pt C 88.71°S 68.7°W).
+- Apollo 15 / 17 Sun elevation at touchdown (~12.0° / ~13.3°), reported via the Z.ai research chat; verify from mission records before using as a backtest.
+- Any number from the Z.ai research chat (see `status.md`).

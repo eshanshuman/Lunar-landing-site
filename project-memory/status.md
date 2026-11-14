@@ -7,6 +7,16 @@
 
 **Team right now: Osho only** (with Claude in the claude.ai Project and Claude Code on the laptop).
 
+**3D LOLA shadow predictor** (scope item 4, panel "Shadows on the ground").
+
+**3D LOLA shadow predictor (built 2026-11-14):**
+- Terrain is **real**: `public/data/tile_<site>.png` + `.json` for ridge, shack, degerl, peak, nobile, cut by `pipeline/build_tile.py` from `LDEM_80S_20MPP_ADJ.TIF` (20 km square, 512 px, 16-bit heights, ~350 KB each, committed). Read straight from the PGDA address as a cloud-optimised GeoTIFF; no full download needed.
+- The Sun and Earth directions and the lit/blocked verdict it shows are **still sample data** (it reads the same store data as every other panel), so the shadows are real ground under a made-up Sun. The panel says so on screen. It becomes real automatically at M3.
+- Honesty on screen: shadows come only from terrain inside the 20 km tile; the verdict comes from the 150 km skyline; when the two differ the panel says "far ridge beyond this tile" (or "disagree"), with hour counts for the mission.
+- Check: `src/lib/terrainShadow.test.ts` compares tile and skyline over the whole demo window for every tile. On sample data it only runs and reports; once `dataset.source` is `pipeline` it fails if they disagree in more than 2% of hours.
+- Cross-check done: each tile's own highest skyline at the centre matches the team's 150 km masks (see `facts.md`).
+- Not checked: frame rate on a real GPU (the cloud sandbox renders in software). Try it on a laptop.
+
 **Pipeline P1: done on Osho's laptop (files in `pipeline/cache/`, which git ignores).**
 - Terrain: `LDEM_80S_20MPP_ADJ` (20 m/px) for ridge, shack, degerl, peak, nobile; `LDEM_60S_60MPP_ADJ` (60 m/px) for im1 and ch3. Both from PGDA product 90. Files live in `C:\Users\LOQ\Downloads\`.
 - Projection checked with `rio info`: longitude of origin 0, standard parallel −90 (south polar stereographic), sphere radius 1,737,400 m. Heights are relative to that sphere.
@@ -18,7 +28,11 @@
 **Open items**
 1. ~~Share the data~~ done: the bundled outputs are committed in `public/data/`. Raw cache still only on the laptop (re-run `build_dataset.py` / `backtest.py` there after any pipeline change).
 2. `fetch_horizons.py` overwrites `ephem_<site>.json` per run; give each window its own output file before the backtest panel is built.
+<<<<<<< HEAD
 3. `build_dataset.py` and `backtest.py` are done. `build_grids.py` (Shadow Vision) has not been run on real terrain.
+=======
+3. `build_dataset.py` is not written yet; it is now the one thing between the 3D shadow predictor and real Sun directions (`backtest.py` is done: rerun `python pipeline/backtest.py` on the laptop to regenerate `public/data/backtest.json`). `build_grids.py` (Shadow Vision) has not been run on real terrain.
+>>>>>>> 3beb83a (Add 3D LOLA shadow predictor on real terrain tiles)
 4. `SOURCES.md`: add both DEM files, the PGDA link, and the shack snapping note.
 5. All site coordinates still need published sources. Candidates from the Z.ai research (verify in the papers first): Gläser et al. 2018 Connecting Ridge C1 (−89.4505°, 222.84°E, 0.4 km from `ridge`) and C2 (−89.3157°, 245.94°E); Bussey et al. 2010 (Icarus, doi:10.1016/j.icarus.2010.03.028) Points A–D, e.g. Shackleton Pt A 89.68°S 166.0°W, de Gerlache Pt C 88.71°S 68.7°W (about 1 km from `degerl`); `peak` may be Bussey Point D.
 6. Possible extra backtest with a documented answer: Apollo 15 and 17 Sun elevation at touchdown (reported ~12.0° and ~13.3°; verify from mission records before use).
@@ -28,6 +42,13 @@
 **Pitch material:** web presentation (claude.ai artifact, 9 slides with 3D morphs), `Lunar_Site_Navigator_Pitch_Clean.pptx` (8 static slides). Both still show sample-data screenshots.
 
 ## Next
+<<<<<<< HEAD
 1. Claude Code on the laptop (needs the 20 m DEM, 2.7 GB, too big for the cloud chat): 3D LOLA shadow predictor (scope 4) and P2 grids for the Sunlight map (scope 3).
 2. Claude in the Project: refresh deck screenshots with real data (Tier C 11 and 12 done).
 3. Tier C 8–10 need the grids / 3D scene, so they follow step 1.
+=======
+1. Get `pipeline/cache` outputs into the repo; write `build_dataset.py`; M3 real-data swap.
+2. 3D LOLA shadow predictor (item 4) and Backtest panel (item 5) are built; item 4 needs M3 to show real Sun positions. Then check it at 60 fps on a laptop.
+3. P2 grids on real terrain for Shadow Vision.
+4. Presets + PWA, then Tier C as time allows. Refresh deck screenshots once real data is in.
+>>>>>>> 3beb83a (Add 3D LOLA shadow predictor on real terrain tiles)

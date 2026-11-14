@@ -14,6 +14,12 @@ the primary source.
 - TODO: date fetched, and the two spot-checks against the Horizons web UI.
 
 ## Terrain
+- **3D shadow view tiles** (`public/data/tile_<site>.png` + `.json`, built 2026-11-14 by `pipeline/build_tile.py`):
+  cut from `LDEM_80S_20MPP_ADJ.TIF`, https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF,
+  linked from PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023),
+  https://pgda.gsfc.nasa.gov/products/90. 20 m per pixel, south polar stereographic, heights in metres above the
+  1,737,400 m sphere. Each tile is a 20 km square (1000 × 1000 source pixels) area-averaged to 512 × 512 and stored as
+  16-bit grayscale. Sites: ridge, shack, degerl, peak, nobile. TODO: confirm the citation and credit wording on the product page.
 - TODO: PGDA LOLA South Pole DEM product name, URL, resolution, version.
 - TODO: validation against published LOLA illumination maps (Mazarico et al. 2011; Barker et al. 2021/2023).
 

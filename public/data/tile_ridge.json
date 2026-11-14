@@ -1,0 +1,23 @@
+{
+ "site": "ridge",
+ "centre_lat": -89.463163,
+ "centre_lon": -137.489553,
+ "size_m": 20000.0,
+ "px": 512,
+ "h_min_m": -1172.914,
+ "h_max_m": 1958.559,
+ "grid_north_to_true_north_deg": 222.5104,
+ "dem": "LDEM_80S_20MPP_ADJ.TIF",
+ "sphere_r_m": 1737400.0,
+ "site_lat": -89.4632,
+ "site_lon": -137.49,
+ "centre_offset_m": [
+  0.86,
+  0.74
+ ],
+ "source_px_m": 20.0,
+ "scale_factor": 1.000022,
+ "centre_height_m": 1944.22,
+ "nodata_fraction": 0.0,
+ "encoding": "uint16; height_m = h_min_m + v / 65535 * (h_max_m - h_min_m); row 0 = top of the DEM grid (largest y)"
+}

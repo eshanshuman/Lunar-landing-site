@@ -1,0 +1,23 @@
+{
+ "site": "nobile",
+ "centre_lat": -85.4381,
+ "centre_lon": 37.366669,
+ "size_m": 20000.0,
+ "px": 512,
+ "h_min_m": 858.849,
+ "h_max_m": 6799.669,
+ "grid_north_to_true_north_deg": 37.3667,
+ "dem": "LDEM_80S_20MPP_ADJ.TIF",
+ "sphere_r_m": 1737400.0,
+ "site_lat": -85.4381,
+ "site_lon": 37.3667,
+ "centre_offset_m": [
+  0.07,
+  -0.03
+ ],
+ "source_px_m": 20.0,
+ "scale_factor": 1.001587,
+ "centre_height_m": 5946.36,
+ "nodata_fraction": 0.0,
+ "encoding": "uint16; height_m = h_min_m + v / 65535 * (h_max_m - h_min_m); row 0 = top of the DEM grid (largest y)"
+}

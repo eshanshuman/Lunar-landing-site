@@ -1,0 +1,23 @@
+{
+ "site": "shack",
+ "centre_lat": -89.78001,
+ "centre_lon": -156.124719,
+ "size_m": 20000.0,
+ "px": 512,
+ "h_min_m": -2845.989,
+ "h_max_m": 1958.498,
+ "grid_north_to_true_north_deg": 203.8753,
+ "dem": "LDEM_80S_20MPP_ADJ.TIF",
+ "sphere_r_m": 1737400.0,
+ "site_lat": -89.7804,
+ "site_lon": -156.1686,
+ "centre_offset_m": [
+  9.45,
+  8.74
+ ],
+ "source_px_m": 20.0,
+ "scale_factor": 1.000004,
+ "centre_height_m": 1735.49,
+ "nodata_fraction": 0.0,
+ "encoding": "uint16; height_m = h_min_m + v / 65535 * (h_max_m - h_min_m); row 0 = top of the DEM grid (largest y)"
+}

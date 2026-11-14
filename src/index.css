@@ -553,6 +553,49 @@
     vertical-align: middle;
   }
 
+  /* 3D terrain */
+  .terrain-view {
+    position: relative;
+    height: 520px;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .terrain-flag {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-sun);
+    background: rgb(9 9 10 / 0.82);
+    border: 1px solid rgb(239 181 79 / 0.35);
+    border-radius: 999px;
+    padding: 3px 11px;
+    pointer-events: none;
+  }
+  .terrain-now {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 12px;
+    max-width: 62ch;
+  }
+  .tag-real {
+    display: inline-block;
+    margin-left: 12px;
+    vertical-align: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-ok);
+    border: 1px solid rgb(108 191 144 / 0.4);
+    border-radius: 999px;
+    padding: 1px 9px;
+  }
+  .tag-real + .tag-sample {
+    margin-left: 6px;
+  }
+
   /* sunlight map */
   .tag-sample {
     display: inline-block;

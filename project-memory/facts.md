@@ -33,6 +33,10 @@ Every number used in the app, deck or pitch must appear here with a source, or c
 - Sky hidden by terrain (our skylines, share of the sky above the local horizontal): ridge 1.2%, shack <0.1%, degerl 1.2%, peak 0.2%, nobile 10.2%, im1 8.4%, ch3 2.3%.
 - Sunlight 2027-10-19 → 11-02 (Sun's upper limb above the terrain skyline): ridge 92.6%, degerl 89.0%.
 
+- **Terrain tiles (20 km, 512 px, from `LDEM_80S_20MPP_ADJ.TIF`, `pipeline/build_tile.py`):** height range in the tile and height at the centre, metres above the sphere — ridge −1173 to 1959, centre 1944 · shack −2846 to 1958, centre 1735 · degerl −1037 to 1815, centre 1794 · peak −1244 to 1648, centre 1645 · nobile 859 to 6800, centre 5946. Centre values are 39 m averages, so they sit a few metres off the 20 m ground heights above. Grid-north to true-north rotation: ridge 222.51°, shack 203.88°, degerl 292.07°, peak 123.69°, nobile 37.37° (equal to east longitude).
+- **Tile vs 150 km mask cross-check:** highest skyline seen from the centre using only the 20 km tile (2 m observer, curvature included) vs the full mask maximum — ridge 2.08° vs 2.04° · shack 1.02° vs 1.04° · degerl 2.50° vs 2.85° · peak 0.81° vs 1.05° · nobile 12.54° vs 12.70°. The nearest high ground sets most of the maximum; the rest is beyond the tile or lost to the 39 m resampling.
+- The 20 m file is 30,400 × 30,400 pixels of 32-bit floats, cloud-optimised with overviews; address: https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF (linked from the PGDA product 90 page).
+
 ## Data products
 - Terrain: PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023). Cloud-optimised GeoTIFFs, south polar stereographic, MOON_ME frame of DE421, heights in metres. Files: `LDEM_80S_20MPP_ADJ`, `LDEM_80S_80MPP_ADJ`, `LDEM_60S_60MPP_ADJ`, `LDEM_60S_240MPP_ADJ`, hillshade `LDEM_80S_80MPP_ADJ_HILL`. Source: [PGDA product 90](https://pgda.gsfc.nasa.gov/products/90)
 - Ephemeris: JPL Horizons API, observer tables, `CENTER='coord@301'`, `COORD_TYPE='GEODETIC'`, targets 10 (Sun) and 399 (Earth), `QUANTITIES='4'`, hourly; azimuth clockwise from north.

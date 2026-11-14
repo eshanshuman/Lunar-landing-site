@@ -26,9 +26,11 @@ Vite + React + TypeScript · React Three Fiber + drei · Zustand · Tailwind · 
 /public/data/               # generated JSON consumed by the app
 /src/scenes/Intro/          # Scene 0 cinematic
 /src/scenes/Moon/           # Scene 1 3D explorer
+/src/scenes/Terrain/        # 3D LOLA shadow predictor (terrain tile, shadow-mapped Sun)
 /src/panels/                # hero (verdict + sites + timeline), slip grid, sky view, diff, explain, data notes
 /src/state/store.ts         # Zustand: site, landingDay, missionLength, t, pinA
 /src/lib/visibility.ts      # horizon interpolation, window stats, next-flip countdowns
+/src/lib/terrainShadow.ts   # terrain tiles: heights, line of sight inside a tile, tile-vs-skyline check
 /src/lib/grid.ts            # Sunlight-map grid bits, hours per point, nearest better point
 ```
 

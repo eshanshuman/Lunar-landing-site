@@ -274,6 +274,7 @@ export default function Hero() {
           </button>
         ))}
         {webgl && <button onClick={() => setRecentre((c) => c + 1)}>Centre on site</button>}
+        <a href="#terrain">3D shadows</a>
         <a href="#map">Sunlight map</a>
         <a href="#slip">Compare landing dates</a>
       </div>

@@ -4,6 +4,7 @@ import Hero from './panels/Hero'
 import SkyView from './panels/SkyView'
 import SlipGrid from './panels/SlipGrid'
 import SunlightMap from './panels/SunlightMap'
+import TerrainPanel from './panels/TerrainPanel'
 import ScenarioDiff from './panels/ScenarioDiff'
 import Explain from './panels/Explain'
 import DataNote from './panels/DataNote'
@@ -45,6 +46,9 @@ export default function App() {
     <>
       <Hero />
       <main className="page">
+        <div className="band">
+          <TerrainPanel />
+        </div>
         <div className="band">
           <SunlightMap />
         </div>

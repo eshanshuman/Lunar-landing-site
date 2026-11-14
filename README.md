@@ -15,6 +15,7 @@ comms) are relative to the terrain horizon. Theme: **"What if we slip?"**
 | M2 3D Moon explorer | Done: globe, Sun lighting from the store's time, site pins, Earth marker, sight lines |
 | M3 Real data swap | Waiting on pipeline output |
 | Sunlight map | Panel done on a synthetic sample grid; `pipeline/build_grids.py` written, not yet run on real data |
+| 3D LOLA shadow predictor | Done on real LOLA terrain tiles for the five Artemis sites; Sun direction is still sample data until M3 |
 | M4 Intro cinematic | Done: 12 s, skippable (button, Esc, Enter, Space), plays once, "Replay intro" in the header, off under reduced motion |
 | P1 Pipeline v1 | Skeletons written; not yet run on real data (see `pipeline/README.md`) |
 
@@ -45,6 +46,8 @@ src/lib/visibility.ts      skyline interpolation, window stats, rise/set countdo
 src/state/store.ts         Zustand: site, landingDay, missionLength, t, pinA
 src/panels/                hero, timeline, sunlight map, slip grid, sky view, scenario diff, why, data notes
 src/scenes/Moon/           3D Moon explorer (geo.ts holds the lat/lon and sky-direction maths, unit-tested)
+src/scenes/Terrain/        3D shadow view: real terrain tile, shadow-mapped Sun, lander with Sun/Earth lines
+src/lib/terrainShadow.ts   tile heights, line of sight inside a tile, tile-vs-skyline comparison (unit-tested)
 src/scenes/Intro/          intro cinematic: camera director, rocket, captions, seen-state
 public/textures/           NASA SVS CGI Moon Kit maps (see SOURCES.md)
 pipeline/                  Python data pipeline

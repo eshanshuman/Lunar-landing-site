@@ -14,7 +14,7 @@
 **Open items**
 1. **Share the data:** `pipeline/cache/` is not in git. Either commit `horizon_*.json` + `ephem_*.json` (small) or zip and share them, so Claude Code can build `public/data/` and the app can switch off sample data (M3).
 2. `fetch_horizons.py` overwrites `ephem_<site>.json` per run; give each window its own output file before the backtest panel is built.
-3. `build_dataset.py` and `backtest.py` are not written yet. `build_grids.py` (Shadow Vision) has not been run on real terrain.
+3. `build_dataset.py` and `backtest.py (IM-1 + Ch3 results computed by hand in chat on 2026-11-15, see facts.md; still needs a committed script)` are not written yet. `build_grids.py` (Shadow Vision) has not been run on real terrain.
 4. `SOURCES.md`: add both DEM files, the PGDA link, and the shack snapping note.
 5. All site coordinates still need published sources. Candidates from the Z.ai research (verify in the papers first): Gläser et al. 2018 Connecting Ridge C1 (−89.4505°, 222.84°E, 0.4 km from `ridge`) and C2 (−89.3157°, 245.94°E); Bussey et al. 2010 (Icarus, doi:10.1016/j.icarus.2010.03.028) Points A–D, e.g. Shackleton Pt A 89.68°S 166.0°W, de Gerlache Pt C 88.71°S 68.7°W (about 1 km from `degerl`); `peak` may be Bussey Point D.
 6. Possible extra backtest with a documented answer: Apollo 15 and 17 Sun elevation at touchdown (reported ~12.0° and ~13.3°; verify from mission records before use).

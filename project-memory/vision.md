@@ -17,7 +17,7 @@ Mission planners first (robotic CLPS / Moon Base landers and crewed Artemis miss
 - Core question everywhere: "If the date slips or the site moves, what do we gain or lose, and why?"
 
 ## The demo story (3 minutes)
-1. **Real landing: IM-1 Odysseus** at Malapert A, landed 2024-02-22 23:23 UTC, last contact 2024-02-29. Show our predicted sunset against what happened. Our flat-horizon calculation says 2 March; if the local skyline is about 3° high, the Sun drops behind it on 29 February. The LOLA terrain run decides which. Be honest that the lander also tipped over.
+1. **Real landing: IM-1 Odysseus** at Malapert A, landed 2024-02-22 23:23 UTC, last contact 2024-02-29. Show our predicted sunset against what happened. The LOLA terrain run says the Sun went behind the terrain on 2 March ~14:17 UTC, about 2.5 days after last contact, so the honest story is: geometry gave it until 2 March, power (tipped lander, misaimed panels) ended it on 29 February. Chandrayaan-3 is the matching second check: our terrain sunset lands a few hours after ISRO put Vikram to sleep. Be honest that the lander also tipped over.
 2. **Future landing: an Artemis IV-style crew landing** at an Artemis region near Shackleton in 2028 (planning scenario, not NASA's announced date or site). Slip it a week, watch sunlight and Earth contact change, use the 3D LOLA shadow predictor to see the shadows, and let the app find a better spot nearby.
 3. Close: "Pick a site. Pick a date. See what you get, in seconds."
 

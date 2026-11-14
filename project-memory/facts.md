@@ -12,7 +12,11 @@ Every number used in the app, deck or pitch must appear here with a source, or c
 - Landed 2024-02-22 23:23 UTC at Malapert A, 80.13°S 1.44°E; last contact 2024-02-29; end of mission declared 2024-03-23. Source: [Wikipedia: IM-1](https://en.wikipedia.org/wiki/IM-1)
 - Stayed active about a week before the Sun set at the site; not designed to survive the lunar night. Source: Wikipedia (above)
 - Landed tipped at about 30°. Source: Wikipedia / Inverse (via Wikipedia references)
-- **Our calculation (JPL DE421 ephemeris, flat horizon, no terrain):** Sun 10.9° up at landing; Sun below 3° at 2024-02-29 21:08 UTC, below 2° at 2024-03-01 08:38, below 1° at 2024-03-01 19:53, sets on the flat horizon at 2024-03-02 07:23 UTC. Terrain result pending from the pipeline.
+- **Our terrain backtest (JPL Horizons hourly Sun at the site + LOLA 60 m horizon mask, observer 2 m):** Sun 10.46° up at landing (skyline 0.20° there). At last contact (2024-02-29) the Sun was 5.4–6.6° up, still ~4.7–5.4° above the local skyline. Sun lower limb reaches the skyline 2024-03-02 09:32 UTC; Sun centre behind terrain 2024-03-02 14:17 UTC (az 273.0°, el 1.43° vs skyline 1.48°); fully hidden 2024-03-02 18:05 UTC. Flat-horizon sunset 2024-03-03 07:12 UTC. Earth visible 100% of the time after landing. Conclusion: Odysseus went quiet ~2.5 days before geometric terrain sunset, so it ran out of power (tipped, panels pointing the wrong way, low Sun), not sunlight. (An earlier DE421 run in this file was one day early due to a Julian-date bug; corrected 2026-11-15.) Sources for the power cause: [Rappler](https://www.rappler.com/science/odysseus-moon-lander-loses-power/), [The Space Review](https://www.thespacereview.com/).
+
+## Chandrayaan-3 Vikram (second backtest)
+- Landed 2023-08-23 12:33 UTC; Vikram put to sleep ~2023-09-04 02:30 UTC (08:00 IST); Pragyan slept 2023-09-02. Source: ISRO via SpacePolicyOnline / SpaceNews.
+- **Our terrain backtest (Horizons + LOLA 60 m mask):** Sun 8.69° at landing; Sun lower limb at skyline 2023-09-04 04:48 UTC, centre behind terrain 06:11 UTC, fully hidden 07:36 UTC; flat-horizon sunset 2023-09-04 16:07 UTC. Earth 100% visible. Our terrain sunset is ~3.7 h after ISRO put Vikram to sleep, consistent with sleeping just before sunset. Caveats: hourly ephemeris, landing coordinate uncertainty; SpaceNews quoted local sunset as 5 Sep (likely a flat or date-line approximation).
 
 ## South pole geometry
 - Sun stays within ~1.5° of the horizon at the pole itself (Moon's axial tilt ≈ 1.54°); up to ~7° across the wider south-pole region.

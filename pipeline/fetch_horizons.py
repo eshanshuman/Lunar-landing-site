@@ -94,7 +94,7 @@ def fetch(site: dict, body: str, start: str, stop: str, cache: Path, sleep_s: fl
         return path.read_text()
     import requests
 
-    r = requests.get(API, params=build_params(site, BODIES[body], start, stop), timeout=120)
+    r = requests.get(API, params=build_params(site, BODIES[body], start, stop), timeout=(30, 900))
     r.raise_for_status()
     if "$$SOE" not in r.text:
         raise RuntimeError(f"Horizons returned no table for {site['id']} / {body}:\n{r.text[-1500:]}")

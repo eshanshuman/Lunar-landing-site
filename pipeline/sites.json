@@ -1,9 +1,9 @@
 [
-  {"id": "ridge",  "name": "Connecting ridge",     "group": "Artemis study regions", "lat": -89.4632, "lon": -137.49,   "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "shack",  "name": "Shackleton rim",       "group": "Artemis study regions", "lat": -89.7668, "lon": -171.87,   "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "degerl", "name": "de Gerlache rim",      "group": "Artemis study regions", "lat": -88.6834, "lon": -67.9321,  "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "peak",   "name": "Peak near Shackleton", "group": "Artemis study regions", "lat": -88.811,  "lon": 123.6901,  "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "nobile", "name": "Nobile rim 1",         "group": "Artemis study regions", "lat": -85.4381, "lon": 37.3667,   "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "im1",    "name": "IM-1 · Malapert A",    "group": "Past landings",         "lat": -80.13,   "lon": 1.44,      "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
-  {"id": "ch3",    "name": "Chandrayaan-3",        "group": "Past landings",         "lat": -69.37,   "lon": 32.32,     "alt_km": null, "source": "UNVERIFIED prototype value (PLAN.md §11)"}
+  {"id": "ridge", "name": "Connecting ridge", "group": "Artemis study regions", "lat": -89.4632, "lon": -137.49, "alt_km": 1.9453, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
+  {"id": "shack", "name": "Shackleton rim", "group": "Artemis study regions", "lat": -89.7804, "lon": -156.1686, "alt_km": 1.7384, "source": "snapped to highest LDEM_80S_20MPP_ADJ.tiff point within 3.0 km of (-89.7668, -171.87) by snap_to_rim.py; still UNVERIFIED vs published coordinates"},
+  {"id": "degerl", "name": "de Gerlache rim", "group": "Artemis study regions", "lat": -88.6834, "lon": -67.9321, "alt_km": 1.7938, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
+  {"id": "peak", "name": "Peak near Shackleton", "group": "Artemis study regions", "lat": -88.811, "lon": 123.6901, "alt_km": 1.6465, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
+  {"id": "nobile", "name": "Nobile rim 1", "group": "Artemis study regions", "lat": -85.4381, "lon": 37.3667, "alt_km": 5.9445, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
+  {"id": "im1", "name": "IM-1 · Malapert A", "group": "Past landings", "lat": -80.13, "lon": 1.44, "alt_km": 2.593, "source": "UNVERIFIED prototype value (PLAN.md §11)"},
+  {"id": "ch3", "name": "Chandrayaan-3", "group": "Past landings", "lat": -69.37, "lon": 32.32, "alt_km": 0.5285, "source": "UNVERIFIED prototype value (PLAN.md §11)"}
 ]

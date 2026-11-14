@@ -40,5 +40,5 @@
 
 ## Next
 1. 3D LOLA shadow predictor (scope 4) is done. Still open from Tier A: P2 grids for the Sunlight map (scope 3). The 20 m and 80 m DEMs can be read window by window from the PGDA https address (cloud-optimised GeoTIFF), so the grids no longer need the laptop's copy; `build_grids.py` still wants `ephem_<site>.json`, which is only in the laptop's `pipeline/cache/`; in the cloud, use the Sun/Earth tracks already in `public/data/dataset.json` (the October 2028 window) instead.
-2. Deck refreshed (done). Next in the Project: critique items (a) uncertainty section and (b) marginal state, if Osho agrees.
+2. Deck refreshed (done). Critique items (a) uncertainty section and (b) marginal state deferred to tomorrow (Osho near his usage limit; priority is a working demo).
 3. Tier C 8–10 need the grids / 3D scene, so they follow step 1.

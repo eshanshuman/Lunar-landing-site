@@ -7,6 +7,8 @@ import { useSiteData, useStore } from '../state/store'
 import { placeName } from './ScenarioDiff'
 import IntroOverlay from '../scenes/Intro/IntroOverlay'
 import Timeline from './Timeline'
+import { PRESETS } from '../data/presets'
+import { prefersReducedMotion as reduceMotion } from '../scenes/Intro/introState'
 
 const MoonScene = lazy(() => import('../scenes/Moon/MoonScene'))
 
@@ -79,6 +81,7 @@ export default function Hero() {
   const setMissionLength = useStore((s) => s.setMissionLength)
   const setHoverSite = useStore((s) => s.setHoverSite)
   const pin = useStore((s) => s.pin)
+  const loadPreset = useStore((s) => s.loadPreset)
   const unpin = useStore((s) => s.unpin)
   const intro = useStore((s) => s.intro)
   const revealed = useStore((s) => s.revealed)
@@ -258,6 +261,18 @@ export default function Hero() {
       </nav>
 
       <div className="hero-links">
+        {PRESETS.map((p) => (
+          <button
+            key={p.id}
+            title={p.note}
+            onClick={() => {
+              const target = loadPreset(p.id)
+              if (target) document.getElementById(target)?.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth' })
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
         {webgl && <button onClick={() => setRecentre((c) => c + 1)}>Centre on site</button>}
         <a href="#map">Sunlight map</a>
         <a href="#slip">Compare landing dates</a>

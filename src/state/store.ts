@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { dataFor, dataset, gridFor } from '../data/dataset'
 import { isCentre } from '../lib/grid'
+import { PRESETS } from '../data/presets'
 import type { Cell } from '../types'
 import { introSeen, markIntroSeen, prefersReducedMotion } from '../scenes/Intro/introState'
 
@@ -27,6 +28,8 @@ interface State {
   pinA: Pin | null
   /** Playback speed multiplier. */
   speed: number
+  /** Mission shown in the backtest panel (index into backtest.json). */
+  backtestPick: number
   /** Site under the pointer in the site list, so the 3D pin can light up. */
   hoverSite: string | null
   /** The intro cinematic is playing. */
@@ -52,6 +55,9 @@ interface State {
   setIntroTime: (t: number) => void
   pin: () => void
   unpin: () => void
+  setBacktestPick: (i: number) => void
+  /** Load a demo preset; returns the element id to scroll to, if any. */
+  loadPreset: (id: string) => string | null
 }
 
 const lastHour = (missionLength: number) => missionLength * 24 - 1
@@ -69,6 +75,7 @@ export const useStore = create<State>((set) => ({
   pinA: null,
   speed: 1,
   hoverSite: null,
+  backtestPick: 0,
   intro: playIntro,
   introTime: 0,
   revealed: !playIntro,
@@ -104,6 +111,17 @@ export const useStore = create<State>((set) => ({
   setIntroTime: (t) => set((s) => (Math.abs(t - s.introTime) >= 0.1 ? { introTime: t } : s)),
   pin: () => set((s) => ({ pinA: { site: s.site, cell: s.cell, landingDay: s.landingDay, missionLength: s.missionLength } })),
   unpin: () => set({ pinA: null }),
+  setBacktestPick: (backtestPick) => set({ backtestPick }),
+  loadPreset: (id) => {
+    const p = PRESETS.find((x) => x.id === id)
+    if (!p) return null
+    if (p.kind === 'backtest') {
+      set({ backtestPick: p.mission })
+      return 'backtest'
+    }
+    set({ site: p.site, cell: null, landingDay: p.landingDay, missionLength: p.missionLength, t: 0, playing: false })
+    return null
+  },
 }))
 
 /** Data for what is selected now: the named site, or the map point picked on it. */

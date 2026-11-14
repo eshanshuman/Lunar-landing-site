@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { C, FONT } from '../lib/theme'
 import { fmtDT } from '../lib/format'
 import { useCanvas } from './useCanvas'
+import { useStore } from '../state/store'
 
 /** One entry of public/data/backtest.json, written by pipeline/backtest.py. */
 type Mission = {
@@ -173,7 +174,8 @@ function Chart({ m, zoom }: { m: Mission; zoom: boolean }) {
 export default function Backtest() {
   const [data, setData] = useState<Mission[] | null>(null)
   const [failed, setFailed] = useState(false)
-  const [pick, setPick] = useState(0)
+  const pick = useStore((s) => s.backtestPick)
+  const setPick = useStore((s) => s.setBacktestPick)
   const [zoom, setZoom] = useState(false)
 
   useEffect(() => {

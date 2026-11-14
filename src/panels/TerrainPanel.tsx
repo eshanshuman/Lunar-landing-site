@@ -41,6 +41,7 @@ export default function TerrainPanel() {
   const t = useStore((s) => s.t)
   const [tile, setTile] = useState<Tile | null | 'loading' | 'error'>('loading')
   const [exaggeration, setExaggeration] = useState(1)
+  const [fill, setFill] = useState(false)
   const webgl = useMemo(hasWebGL, [])
   const name = siteById(site).name
   // Always the named site: the tile is centred on it, not on a point picked on the Sunlight map.
@@ -123,7 +124,7 @@ export default function TerrainPanel() {
         <div className="terrain-view">
           {webgl ? (
             <Suspense fallback={<div className="hero-msg">Loading the 3D view…</div>}>
-              <TerrainScene tile={tile} sky={sky} exaggeration={exaggeration} />
+              <TerrainScene tile={tile} sky={sky} exaggeration={exaggeration} fill={fill} />
             </Suspense>
           ) : (
             <div className="hero-msg">This view needs WebGL, which this browser is not providing.</div>
@@ -154,6 +155,16 @@ export default function TerrainPanel() {
           {exaggeration === 1
             ? 'Heights and distances are drawn to the same scale, so the shadows are the real geometry.'
             : `Heights are stretched ${exaggeration}× to make the relief easier to see. The shadows you see are then longer or shorter than the real ones. The verdict below the view is not affected.`}
+        </p>
+
+        <h2 className="mt-7">Shadow detail</h2>
+        <button className="btn" aria-pressed={fill} onClick={() => setFill((f) => !f)}>
+          Shadow detail (visual aid): {fill ? 'on' : 'off'}
+        </button>
+        <p className="note mt-3">
+          {fill
+            ? 'Faint fill light added as a visual aid; the shadow edges and the verdict are unchanged.'
+            : 'Off: ground in shadow is drawn almost black, as it would be with no air to scatter light.'}
         </p>
 
         <h2 className="mt-7">What this view can and cannot show</h2>

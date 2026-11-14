@@ -209,7 +209,11 @@ function NorthArrow({ tile }: { tile: Tile }) {
   )
 }
 
-export default function TerrainScene({ tile, sky, exaggeration }: { tile: Tile; sky: Sky; exaggeration: number }) {
+/** Ambient light: the base level, and the optional extra that lifts shadowed ground just enough to read its shape. */
+export const AMBIENT = 0.05
+export const FILL = 0.09
+
+export default function TerrainScene({ tile, sky, exaggeration, fill }: { tile: Tile; sky: Sky; exaggeration: number; fill: boolean }) {
   return (
     <Canvas
       shadows="soft"
@@ -221,7 +225,8 @@ export default function TerrainScene({ tile, sky, exaggeration }: { tile: Tile; 
       role="img"
       aria-label="3D terrain around the site with Sun shadows and lines to the Sun and Earth"
     >
-      <ambientLight intensity={0.05} />
+      {/* The fill only brightens what is already in shadow. Shadow edges come from the Sun light alone. */}
+      <ambientLight intensity={AMBIENT + (fill ? FILL : 0)} />
       <Sun tile={tile} sky={sky} exaggeration={exaggeration} />
       <Ground tile={tile} exaggeration={exaggeration} />
       <Lander tile={tile} sky={sky} />

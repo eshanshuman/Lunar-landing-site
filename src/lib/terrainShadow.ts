@@ -24,6 +24,8 @@ export interface TileMeta {
   grid_north_to_true_north_deg: number
   dem: string
   sphere_r_m: number
+  /** Ground height at the site from the full-resolution DEM. The averaged tile reads lower on a sharp crest. */
+  site_height_m?: number
 }
 
 export interface Tile {
@@ -66,6 +68,16 @@ export function tileDirection(meta: TileMeta, azDeg: number): [number, number] {
   return [Math.sin(phi), Math.cos(phi)]
 }
 
+/**
+ * Ground height under the lander. Uses the full-resolution value when the tile carries one: the
+ * tile averages ~39 m of ground, which puts a 2 m observer on a crest a metre or more too low
+ * and makes rock a few tens of metres away look higher than it is.
+ */
+export function groundAtSite(t: Tile): number {
+  const centre = heightAt(t, 0, 0) ?? 0
+  return Math.max(centre, t.meta.site_height_m ?? centre)
+}
+
 /** How far the sphere has dropped below the horizontal plane at ground distance d, metres. */
 export const curvatureDrop = (d: number, r: number) => (d * d) / (2 * r)
 
@@ -76,7 +88,7 @@ export const curvatureDrop = (d: number, r: number) => (d * d) / (2 * r)
 export function tileBlocks(t: Tile, azDeg: number, elDeg: number, observerHeight = 2): boolean {
   const [dx, dy] = tileDirection(t.meta, azDeg)
   const step = cellSize(t)
-  const eye = (heightAt(t, 0, 0) ?? 0) + observerHeight
+  const eye = groundAtSite(t) + observerHeight
   const slope = Math.tan(elDeg * D2R)
   for (let d = step; ; d += step) {
     const h = heightAt(t, dx * d, dy * d)

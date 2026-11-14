@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { decode } from 'fast-png'
 import { describe, expect, it } from 'vitest'
 import { dataset } from '../data/dataset'
-import { classify, compareOverWindow, heightAt, heightsFromU16, tileBlocks, tileDirection, type Tile, type TileMeta } from './terrainShadow'
+import { classify, compareOverWindow, groundAtSite, heightAt, heightsFromU16, tileBlocks, tileDirection, type Tile, type TileMeta } from './terrainShadow'
 
 const R = 1_737_400
 
@@ -102,21 +102,27 @@ describe('shipped tiles vs the horizon masks', () => {
     }
   })
 
-  // Over the whole demo window: wherever the tile alone blocks the Sun, the 150 km skyline must
-  // block it too (the tile is part of that skyline). "far" hours are expected and fine.
+  // Over the whole demo window: wherever the tile alone blocks the Sun or Earth, the 150 km skyline
+  // must block it too, because the tile is part of that skyline. "far" hours are expected and fine.
+  // Measured 2026-11-14 on the real October 2028 data: 0 mismatch hours at every site, both bodies.
   const window = (dataset.days + Math.max(...dataset.missionLengths)) * 24
-  for (const id of ids) {
-    it(`${id}: tile and skyline are compared over the demo window`, () => {
-      const c = compareOverWindow(shipped(id)!, dataset.bySite[id], 'sun', 0, window)
-      expect(c.lit + c.near + c.far + c.mismatch).toBe(c.n)
-      if (dataset.source === 'pipeline') {
-        // Real skyline and real Sun: allow a little slack for the 39 m tile vs the 20 m mask.
-        expect(c.mismatch / c.n).toBeLessThan(0.02)
-      } else {
-        // Sample skyline and sample Sun against real terrain: the comparison runs, but its result
-        // means nothing yet, so nothing is asserted about it.
-        console.info(`[sample data] ${id}: lit ${c.lit} h, near ${c.near} h, far ${c.far} h, mismatch ${c.mismatch} h of ${c.n} h`)
-      }
-    })
-  }
+  for (const id of ids)
+    for (const body of ['sun', 'earth'] as const) {
+      it(`${id}: tile never contradicts the skyline for the ${body} over the demo window`, () => {
+        const c = compareOverWindow(shipped(id)!, dataset.bySite[id], body, 0, window)
+        expect(c.lit + c.near + c.far + c.mismatch).toBe(c.n)
+        expect(c.n).toBe(window)
+        if (dataset.source === 'pipeline') expect(c.mismatch / c.n).toBeLessThan(0.01)
+        // On the synthetic sample dataset the comparison is real ground against a made-up sky, so it is not asserted.
+      })
+    }
+
+  it('stands the observer on the full-resolution ground height, not the averaged centre', () => {
+    for (const id of ids) {
+      const t = shipped(id)!
+      expect(t.meta.site_height_m).toBeDefined()
+      expect(groundAtSite(t)).toBeGreaterThanOrEqual(heightAt(t, 0, 0)!)
+      expect(groundAtSite(t) - heightAt(t, 0, 0)!).toBeLessThan(5)
+    }
+  })
 })

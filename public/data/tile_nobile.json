@@ -17,6 +17,7 @@
  ],
  "source_px_m": 20.0,
  "scale_factor": 1.001587,
+ "site_height_m": 5946.39,
  "centre_height_m": 5946.36,
  "nodata_fraction": 0.0,
  "encoding": "uint16; height_m = h_min_m + v / 65535 * (h_max_m - h_min_m); row 0 = top of the DEM grid (largest y)"

@@ -10,7 +10,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { curvatureDrop, heightAt, tileDirection, type Tile } from '../../lib/terrainShadow'
+import { curvatureDrop, groundAtSite, heightAt, tileDirection, type Tile } from '../../lib/terrainShadow'
 import { C } from '../../lib/theme'
 
 const D2R = Math.PI / 180
@@ -143,7 +143,8 @@ function ScreenScale({ k, children }: { k: number; children: React.ReactNode }) 
 
 /** Lander marker at the tile centre with its lines to the Sun and Earth. */
 function Lander({ tile, sky }: { tile: Tile; sky: Sky }) {
-  const base = useMemo(() => new THREE.Vector3(0, 0.03, 0), [])
+  // The lander stands on the site's true ground height, a little above the averaged mesh on a crest.
+  const base = useMemo(() => new THREE.Vector3(0, (groundAtSite(tile) - (heightAt(tile, 0, 0) ?? 0) + 2) / 1000, 0), [tile])
   const sunEnd = skyVector(tile, sky.sunAz, sky.sunEl).multiplyScalar(LINE_KM).add(base)
   const earthEnd = skyVector(tile, sky.earthAz, sky.earthEl).multiplyScalar(LINE_KM).add(base)
   const line = (end: THREE.Vector3, colour: string, clear: boolean) => (
@@ -197,7 +198,8 @@ function Lander({ tile, sky }: { tile: Tile; sky: Sky }) {
 /** A small arrow on the tile's edge pointing to true north. */
 function NorthArrow({ tile }: { tile: Tile }) {
   const [dx, dy] = tileDirection(tile.meta, 0)
-  const r = tile.meta.size_m / 2000 + 1.1
+  // Beyond the tile's corners, so it never sits on the terrain whatever the grid rotation.
+  const r = (tile.meta.size_m / 2000) * Math.SQRT2 + 1.2
   const q = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(dx, 0, -dy)), [dx, dy])
   return (
     <mesh position={[dx * r, 0, -dy * r]} quaternion={q}>

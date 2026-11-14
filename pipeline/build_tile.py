@@ -10,7 +10,10 @@ Writes public/data/tile_<site>.png (16-bit grayscale; row 0 is the top of the DE
 public/data/tile_<site>.json:
 
     {site, centre_lat, centre_lon, size_m, px, h_min_m, h_max_m,
-     grid_north_to_true_north_deg, dem, sphere_r_m, ...}
+     grid_north_to_true_north_deg, dem, sphere_r_m, site_height_m, ...}
+
+`site_height_m` is the ground height at the site from the full-resolution DEM (the tile's own centre
+is an average over ~39 m and reads lower on a crest). The app stands its observer on it.
 
 Height of pixel value v:  h_min_m + v / 65535 * (h_max_m - h_min_m), metres above the sphere.
 `size_m` is measured on the DEM grid; `scale_factor` says how much the projection stretches it
@@ -90,6 +93,14 @@ def main() -> int:
             if ds.nodata is not None and not np.isnan(ds.nodata):
                 src[src == ds.nodata] = np.nan
             holes = float(np.isnan(src).mean())
+            # Ground height at the site itself, bilinear from the full-resolution DEM. On a sharp crest the
+            # averaged tile is a metre or more lower at its centre, which matters for a 2 m observer.
+            fr, fc = row - r0 - 0.5, col - c0 - 0.5
+            i0, j0 = int(np.floor(fr)), int(np.floor(fc))
+            v, u = fr - i0, fc - j0
+            site_h = float(
+                src[i0, j0] * (1 - u) * (1 - v) + src[i0, j0 + 1] * u * (1 - v) + src[i0 + 1, j0] * (1 - u) * v + src[i0 + 1, j0 + 1] * u * v
+            )
             tile = block_mean(src, args.px)
             u16, h_min, h_max = quantise_u16(tile)
 
@@ -114,6 +125,7 @@ def main() -> int:
                 "centre_offset_m": [round(x - cx, 2), round(y - cy, 2)],
                 "source_px_m": px_m,
                 "scale_factor": round(scale_factor(centre_lat), 6),
+                "site_height_m": round(site_h, 2),
                 "centre_height_m": round(float(tile[args.px // 2 - 1 : args.px // 2 + 1, args.px // 2 - 1 : args.px // 2 + 1].mean()), 2),
                 "nodata_fraction": round(holes, 6),
                 "encoding": "uint16; height_m = h_min_m + v / 65535 * (h_max_m - h_min_m); row 0 = top of the DEM grid (largest y)",

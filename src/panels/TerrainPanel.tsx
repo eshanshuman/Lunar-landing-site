@@ -17,6 +17,9 @@ function hasWebGL() {
   }
 }
 
+/** "2.0° up" or "6.6° below level": elevation against the site's horizontal, not the terrain. */
+const angle = (el: number) => (el >= 0 ? `${el.toFixed(1)}° up` : `${(-el).toFixed(1)}° below level`)
+
 const NOW: Record<Agreement, { cls: string; text: string }> = {
   lit: { cls: 'text-sun', text: 'The lander is in sunlight.' },
   near: { cls: 'text-bad', text: 'The lander is in shadow. Terrain inside this tile is blocking the Sun, as the view shows.' },
@@ -131,8 +134,8 @@ export default function TerrainPanel() {
           {status.text}
         </p>
         <div className="legend">
-          <span><i style={{ background: 'var(--color-sun)' }} />Line to the Sun ({sky.sunEl.toFixed(1)}° up)</span>
-          <span><i style={{ background: 'var(--color-earth)' }} />Line to Earth ({sky.earthEl.toFixed(1)}° up)</span>
+          <span><i style={{ background: 'var(--color-sun)' }} />Line to the Sun ({angle(sky.sunEl)})</span>
+          <span><i style={{ background: 'var(--color-earth)' }} />Line to Earth ({angle(sky.earthEl)})</span>
           <span><i style={{ background: 'var(--color-bad)' }} />Red and dashed: blocked by terrain</span>
           <span className="text-dim">The grey arrow on the edge points to true north. Drag to rotate, scroll to zoom.</span>
         </div>

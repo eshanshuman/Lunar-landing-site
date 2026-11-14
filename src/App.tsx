@@ -7,6 +7,7 @@ import SunlightMap from './panels/SunlightMap'
 import ScenarioDiff from './panels/ScenarioDiff'
 import Explain from './panels/Explain'
 import DataNote from './panels/DataNote'
+import Backtest from './panels/Backtest'
 
 /** Space = play/pause, ←/→ = step hours, ↑/↓ = change site (PLAN.md §8). */
 function useKeyboard() {
@@ -49,6 +50,9 @@ export default function App() {
         <div className="band">
           <SlipGrid />
           <ScenarioDiff />
+        </div>
+        <div className="band">
+          <Backtest />
         </div>
         <div className="band">
           <SkyView />

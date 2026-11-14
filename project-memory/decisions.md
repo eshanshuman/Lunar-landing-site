@@ -17,3 +17,4 @@
 - **2026-11-14** — Moved `shack` onto Shackleton's rim crest with `snap_to_rim.py` (it sat on the inner wall). Interim fix until a published coordinate replaces it.
 - **2026-11-14** — Z.ai (GLM) research chat is a cross-check and write-up source only; its numbers do not go into the app (Earth-visibility and map bugs, coarser terrain, no Horizons access).
 - 2026-11-15: IM-1 demo story = 'terrain sunset 2 Mar, lander died 29 Feb on power'; Chandrayaan-3 added as second backtest. Earlier IM-1 dates were off by one day (JD bug) and are corrected.
+- 2026-11-15: Backtest panel shows both IM-1 and Chandrayaan-3 with a whole-mission / around-sunset zoom. IM-1's end is shown as a day-long band because only the date (29 Feb) is public, so the gap is stated as a range (1.6–2.6 days).

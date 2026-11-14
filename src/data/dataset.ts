@@ -2,12 +2,39 @@
  * The single place the app gets its data from. M3 swaps in pipeline JSON from public/data/
  * here and keeps the sample as the fallback.
  */
-import type { Cell, Dataset, GridData, SiteData } from '../types'
+import type { Cell, Dataset, GridData, Site, SiteData } from '../types'
 import { isCentre, pointBits, pointIndex } from '../lib/grid'
 import { sampleDataset } from './sample'
 import { buildSampleGrid } from './sampleGrid'
+// Written by pipeline/build_dataset.py: real JPL Horizons tracks and LOLA skylines.
+import real from '../../public/data/dataset.json'
 
-export const dataset: Dataset = sampleDataset
+type RealFile = {
+  source: 'pipeline'
+  start_utc: string
+  days: number
+  mission_lengths: number[]
+  sites: Site[]
+  bySite: Record<string, SiteData>
+}
+
+function fromPipeline(f: RealFile): Dataset {
+  return {
+    source: 'pipeline',
+    sites: f.sites,
+    bySite: f.bySite,
+    startMs: Date.parse(f.start_utc),
+    days: f.days,
+    missionLengths: f.mission_lengths,
+  }
+}
+
+/** Add ?sample to the URL to see the old synthetic data (for comparison only). */
+const wantSample = typeof location !== 'undefined' && new URLSearchParams(location.search).has('sample')
+export const dataset: Dataset = wantSample ? sampleDataset : fromPipeline(real as unknown as RealFile)
+
+/** The Sunlight-map grids are still synthetic until build_grids.py runs on real terrain. */
+export const gridSource: 'sample' | 'pipeline' = 'sample'
 export const siteById = (id: string) => dataset.sites.find((s) => s.id === id)!
 export const dayMs = (day: number) => dataset.startMs + day * 864e5
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { dataset, gridFor, siteById } from '../data/dataset'
+import { dataset, gridFor, gridSource, siteById } from '../data/dataset'
 import { fmtDur, pct } from '../lib/format'
 import { bit, centreCell, describeMove, nearestBetter, pointIndex, visibleHours } from '../lib/grid'
 import { C, FONT } from '../lib/theme'
@@ -194,7 +194,7 @@ export default function SunlightMap() {
   const heading = (
     <h2>
       Sunlight map
-      {dataset.source === 'sample' && <span className="tag-sample">Sample data</span>}
+      {(dataset.source === 'sample' || gridSource === 'sample') && <span className="tag-sample">Sample data</span>}
       <span className="sub">
         The 20 km around {name}, one square every 500 m. A short move can change how much {B.word} a lander gets.
         Pick a square to try that point.

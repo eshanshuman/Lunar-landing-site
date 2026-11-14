@@ -18,3 +18,5 @@
 - **2026-11-14** — Z.ai (GLM) research chat is a cross-check and write-up source only; its numbers do not go into the app (Earth-visibility and map bugs, coarser terrain, no Horizons access).
 - 2026-11-15: IM-1 demo story = 'terrain sunset 2 Mar, lander died 29 Feb on power'; Chandrayaan-3 added as second backtest. Earlier IM-1 dates were off by one day (JD bug) and are corrected.
 - 2026-11-15: Backtest panel shows both IM-1 and Chandrayaan-3 with a whole-mission / around-sunset zoom. IM-1's end is shown as a day-long band because only the date (29 Feb) is public, so the gap is stated as a range (1.6–2.6 days).
+- 2026-11-15: Team is Osho alone for now (Garima/Avin not active). Claude in the Project does data, checks and app panels; Claude Code on the laptop does anything needing the large DEM files.
+- 2026-11-15: Demo window = landings 1–28 Oct 2028 (+14 days). March–May 2028 is the dark season for the Artemis sites (mostly red), October 2028 gives a real mix of good and bad dates. App loads `public/data/dataset.json` at build time; `?sample` keeps the synthetic data for comparison.

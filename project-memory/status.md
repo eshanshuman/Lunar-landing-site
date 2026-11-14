@@ -25,6 +25,6 @@
 
 ## Next
 1. Get `pipeline/cache` outputs into the repo; write `build_dataset.py`; M3 real-data swap.
-2. IM-1 terrain backtest (data already on the laptop) and the 3D LOLA shadow predictor (scope items 4–5).
+2. IM-1 + Chandrayaan-3 terrain backtest numbers are done (see `facts.md`); commit them as `backtest.py` and build the backtest panel. Then the 3D LOLA shadow predictor (scope items 4–5).
 3. P2 grids on real terrain for Shadow Vision.
 4. Presets + PWA, then Tier C as time allows. Refresh deck screenshots once real data is in.

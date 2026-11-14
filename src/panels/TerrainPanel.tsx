@@ -28,7 +28,7 @@ const NOW: Record<Agreement, { cls: string; text: string }> = {
     text: 'The lander is in shadow from a far ridge beyond this tile. The view cannot draw that shadow, so the ground here may look lit.',
   },
   mismatch: {
-    cls: 'text-sun',
+    cls: 'text-bad',
     text: 'The 150 km skyline says the lander is lit, but terrain inside this tile blocks the Sun. The two disagree here; trust neither without checking.',
   },
 }

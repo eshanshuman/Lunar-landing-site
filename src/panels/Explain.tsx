@@ -1,14 +1,16 @@
-import { dataset, siteById } from '../data/dataset'
+import { siteById } from '../data/dataset'
 import { compass, pct } from '../lib/format'
 import { horizonAt, sunVisible, windowStats } from '../lib/visibility'
-import { useStore } from '../state/store'
+import { useSiteData, useStore } from '../state/store'
+import { placeName } from './ScenarioDiff'
 
 /** Plain-language explanation generated from the data for the selected scenario. */
 export default function Explain() {
   const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
   const missionLength = useStore((s) => s.missionLength)
-  const d = dataset.bySite[site]
+  const d = useSiteData()
+  const cell = useStore((s) => s.cell)
   const s0 = landingDay * 24
   const s1 = Math.min(s0 + missionLength * 24, d.sun.el.length)
   const st = windowStats(d, s0, missionLength * 24)
@@ -21,6 +23,21 @@ export default function Explain() {
   for (let i = s0; i < s1; i++) if (!sunVisible(d, i)) hits[Math.floor(d.sun.az[i]) % 360]++
   let best = 0
   for (let a = 1; a < 360; a++) if (hits[a] > hits[best]) best = a
+
+  if (d.vis) {
+    // A map point stores when the Sun and Earth are in view, but not the skyline that explains why.
+    return (
+      <section className="card aside">
+        <h2>Why this result</h2>
+        <div className="explain">
+          At <b>{placeName(site, cell)}</b> the Sun is in view <b>{pct(st.sunF)}%</b> of this window and Earth{' '}
+          <b>{pct(st.earthF)}%</b>; the longest dark stretch is <b>{st.maxDark} h</b>. The map keeps hourly visibility
+          for each point but not its skyline, so it cannot say which ridge is responsible. A few hundred metres can
+          change the answer because the Sun sits so close to the horizon here.
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="card aside">

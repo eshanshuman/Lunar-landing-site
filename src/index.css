@@ -528,6 +528,67 @@
     vertical-align: middle;
   }
 
+  /* sunlight map */
+  .tag-sample {
+    display: inline-block;
+    margin-left: 12px;
+    vertical-align: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-sun);
+    border: 1px solid rgb(239 181 79 / 0.35);
+    border-radius: 999px;
+    padding: 1px 9px;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-line2);
+    border-radius: 999px;
+    padding: 2px;
+  }
+  .seg button {
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .seg button:hover {
+    color: var(--color-text);
+  }
+  .seg button[aria-pressed='true'] {
+    background: rgb(255 255 255 / 0.14);
+    color: var(--color-text);
+  }
+  .legend i.chip {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+  .legend i.ramp {
+    display: block;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    margin: 0 0 4px;
+  }
+  .move {
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--color-ok);
+    margin: 8px 0 6px;
+  }
+  .picked {
+    font-size: 14px;
+    color: var(--color-muted);
+    margin: -6px 0 12px;
+  }
+
   /* slip grid */
   .grid-slip {
     display: grid;

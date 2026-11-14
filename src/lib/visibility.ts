@@ -18,10 +18,13 @@ export function horizonAt(horizon: ArrayLike<number>, az: number): number {
   return horizon[a] * (1 - f) + horizon[(a + 1) % n] * f
 }
 
-const above = (d: SiteData, tr: Track, i: number) => tr.el[i] > horizonAt(d.horizon_deg, tr.az[i])
-export const sunVisible = (d: SiteData, i: number) => above(d, d.sun, i)
-export const earthVisible = (d: SiteData, i: number) => above(d, d.earth, i)
-export const isVisible = (d: SiteData, which: Body, i: number) => above(d, d[which], i)
+export const isVisible = (d: SiteData, which: Body, i: number) => {
+  if (d.vis) return ((d.vis[which][i >> 3] >> (i & 7)) & 1) === 1
+  const tr: Track = d[which]
+  return tr.el[i] > horizonAt(d.horizon_deg, tr.az[i])
+}
+export const sunVisible = (d: SiteData, i: number) => isVisible(d, 'sun', i)
+export const earthVisible = (d: SiteData, i: number) => isVisible(d, 'earth', i)
 
 export interface WindowStats {
   /** Steps in the window (hours when step_h is 1). */

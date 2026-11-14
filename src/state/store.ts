@@ -1,9 +1,12 @@
 import { create } from 'zustand'
-import { dataset } from '../data/dataset'
+import { dataFor, dataset, gridFor } from '../data/dataset'
+import { isCentre } from '../lib/grid'
+import type { Cell } from '../types'
 import { introSeen, markIntroSeen, prefersReducedMotion } from '../scenes/Intro/introState'
 
 export interface Pin {
   site: string
+  cell: Cell | null
   landingDay: number
   missionLength: number
 }
@@ -11,6 +14,8 @@ export interface Pin {
 interface State {
   /** Selected site id. */
   site: string
+  /** A point picked on the site's Sunlight map; null means the named site itself. */
+  cell: Cell | null
   /** Landing-date column: days after dataset.startMs. */
   landingDay: number
   /** Mission length in days. */
@@ -32,8 +37,9 @@ interface State {
   revealed: boolean
 
   selectSite: (id: string) => void
+  setCell: (cell: Cell | null) => void
   stepSite: (dir: 1 | -1) => void
-  selectScenario: (site: string, landingDay: number) => void
+  selectScenario: (site: string, landingDay: number, cell?: Cell | null) => void
   setMissionLength: (days: number) => void
   setT: (t: number) => void
   stepT: (dh: number) => void
@@ -55,6 +61,7 @@ const playIntro = typeof window !== 'undefined' && !introSeen() && !prefersReduc
 
 export const useStore = create<State>((set) => ({
   site: 'ridge',
+  cell: null,
   landingDay: 15,
   missionLength: 10,
   t: 0,
@@ -66,14 +73,21 @@ export const useStore = create<State>((set) => ({
   introTime: 0,
   revealed: !playIntro,
 
-  selectSite: (site) => set({ site }),
+  selectSite: (site) => set({ site, cell: null }),
+  setCell: (cell) =>
+    set((s) => {
+      const g = gridFor(s.site)
+      return { cell: cell && g && !isCentre(g, cell) ? cell : null }
+    }),
   stepSite: (dir) =>
     set((s) => {
       const ids = dataset.sites.map((x) => x.id)
       const i = ids.indexOf(s.site)
-      return { site: ids[(i + dir + ids.length) % ids.length] }
+      return { site: ids[(i + dir + ids.length) % ids.length], cell: null }
     }),
-  selectScenario: (site, landingDay) => set({ site, landingDay, t: 0 }),
+  // Slipping the date keeps a picked map point; changing site drops it.
+  selectScenario: (site, landingDay, cell) =>
+    set((s) => ({ site, landingDay, t: 0, cell: cell !== undefined ? cell : site === s.site ? s.cell : null })),
   setMissionLength: (missionLength) => set((s) => ({ missionLength, t: Math.min(s.t, lastHour(missionLength)) })),
   setT: (t) => set((s) => ({ t: Math.max(0, Math.min(lastHour(s.missionLength), Math.round(t))) })),
   stepT: (dh) => set((s) => ({ t: Math.max(0, Math.min(lastHour(s.missionLength), s.t + dh)) })),
@@ -88,6 +102,9 @@ export const useStore = create<State>((set) => ({
   setRevealed: (revealed) => set({ revealed }),
   // Captions only change a few times, so skip the store update unless a tenth of a second has passed.
   setIntroTime: (t) => set((s) => (Math.abs(t - s.introTime) >= 0.1 ? { introTime: t } : s)),
-  pin: () => set((s) => ({ pinA: { site: s.site, landingDay: s.landingDay, missionLength: s.missionLength } })),
+  pin: () => set((s) => ({ pinA: { site: s.site, cell: s.cell, landingDay: s.landingDay, missionLength: s.missionLength } })),
   unpin: () => set({ pinA: null }),
 }))
+
+/** Data for what is selected now: the named site, or the map point picked on it. */
+export const useSiteData = () => useStore((s) => dataFor(s.site, s.cell))

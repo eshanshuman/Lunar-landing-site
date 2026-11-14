@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { dataset, dayMs } from '../data/dataset'
+import { dayMs } from '../data/dataset'
 import { fmtDT, fmtDur } from '../lib/format'
 import { C, FONT } from '../lib/theme'
 import { isVisible, type Body } from '../lib/visibility'
-import { useStore } from '../state/store'
+import { useSiteData, useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 import Tooltip, { type TipState } from './Tooltip'
 
@@ -21,14 +21,13 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 /** Two thin bars: where the Sun and Earth are in view over the mission. Gaps are terrain blocking them. */
 export default function Timeline() {
-  const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
   const missionLength = useStore((s) => s.missionLength)
   const t = useStore((s) => s.t)
   const playing = useStore((s) => s.playing)
   const setT = useStore((s) => s.setT)
   const togglePlay = useStore((s) => s.togglePlay)
-  const d = dataset.bySite[site]
+  const d = useSiteData()
   const n = missionLength * 24
   const s0 = landingDay * 24
   const dragging = useRef(false)

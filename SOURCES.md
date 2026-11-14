@@ -45,4 +45,4 @@ Intro Earth (downloaded 2026-11-14, NASA SVS, public domain):
 - TODO: IM-1 and Chandrayaan-3 landing and end-of-operations times, with primary sources.
 
 ## Sample data
-`src/data/sample.ts` is synthetic. Anything rendered from it carries the "Sample data" badge.
+`src/data/sample.ts` and `src/data/sampleGrid.ts` (the Sunlight map's grid and its relief) are synthetic. Anything rendered from it carries the "Sample data" badge.

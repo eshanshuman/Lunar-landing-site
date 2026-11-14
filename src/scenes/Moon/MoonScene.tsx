@@ -12,7 +12,7 @@ import type { Line2 } from 'three-stdlib'
 import { dataset, siteById } from '../../data/dataset'
 import { C } from '../../lib/theme'
 import { earthVisible, sunVisible } from '../../lib/visibility'
-import { useStore } from '../../state/store'
+import { useSiteData, useStore } from '../../state/store'
 import IntroDirector from '../Intro/IntroDirector'
 import { sitePosition, skyDirection } from './geo'
 
@@ -134,7 +134,7 @@ function Sky({ mounted }: { mounted: boolean }) {
   const revealed = useStore((s) => s.revealed)
   const invalidate = useThree((s) => s.invalidate)
   const s = siteById(site)
-  const d = dataset.bySite[site]
+  const d = useSiteData()
   const i = Math.min(landingDay * 24 + t, d.sun.el.length - 1)
   const sunClear = sunVisible(d, i)
   const earthClear = earthVisible(d, i)

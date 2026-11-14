@@ -27,6 +27,7 @@ Vite + React + TypeScript · React Three Fiber + drei · Zustand · Tailwind · 
 /src/panels/                # hero (verdict + sites + timeline), slip grid, sky view, diff, explain, data notes
 /src/state/store.ts         # Zustand: site, landingDay, missionLength, t, pinA
 /src/lib/visibility.ts      # horizon interpolation, window stats, next-flip countdowns
+/src/lib/grid.ts            # Sunlight-map grid bits, hours per point, nearest better point
 ```
 
 ## Working style

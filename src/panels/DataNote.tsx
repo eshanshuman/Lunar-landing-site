@@ -25,6 +25,7 @@ export default function DataNote() {
         <summary>Sources and status</summary>
         <ul>
           <li>Sun and Earth positions: synthetic today. Planned: JPL Horizons, hourly, no atmosphere.</li>
+          <li>Sunlight map: synthetic grid and relief today. Planned: the same LOLA model, 41 x 41 points every 500 m.</li>
           <li>Terrain skylines: synthetic today. Planned: LOLA South Pole elevation model, 720 directions per site.</li>
           <li>Moon colour and relief: NASA SVS CGI Moon Kit (LRO camera and LOLA), public domain.</li>
           <li>Site coordinates: published values carried over from the prototype, not yet verified.</li>

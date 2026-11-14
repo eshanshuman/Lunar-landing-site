@@ -1,8 +1,8 @@
-import { dataset, dayMs, siteById } from '../data/dataset'
+import { dayMs, siteById } from '../data/dataset'
 import { fmtDate } from '../lib/format'
 import { C, FONT } from '../lib/theme'
 import { isVisible, type Body } from '../lib/visibility'
-import { useStore } from '../state/store'
+import { useSiteData, useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 
 /** Mean angular radius of the Sun seen from the Moon, degrees (0.53° diameter). */
@@ -13,7 +13,8 @@ export default function SkyView() {
   const landingDay = useStore((s) => s.landingDay)
   const missionLength = useStore((s) => s.missionLength)
   const t = useStore((s) => s.t)
-  const d = dataset.bySite[site]
+  const d = useSiteData()
+  const picked = !!d.vis
 
   const ref = useCanvas(280, (g, w, h) => {
     const hor = d.horizon_deg
@@ -141,6 +142,12 @@ export default function SkyView() {
         <span><i style={{ background: 'var(--color-earth)' }} />Earth path, visible</span>
         <span><i style={{ background: 'var(--color-bad)' }} />Blocked by terrain</span>
         <span><i style={{ background: 'var(--color-rock)' }} />Terrain skyline</span>
+        {picked && (
+          <span className="w-full">
+            This is the skyline at {siteById(site).name} itself. The point you picked on the map has no stored skyline;
+            the dotted stretches show when it is blocked there.
+          </span>
+        )}
         <span className="w-full text-dim">Height is stretched so small angles are visible. There is no atmosphere to bend the light.</span>
       </div>
     </section>

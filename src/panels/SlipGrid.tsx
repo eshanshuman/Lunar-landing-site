@@ -37,7 +37,7 @@ export default function SlipGrid() {
             {DAYS.map((d) => {
               const st = stats[r][d]
               const sel = s.id === site && d === landingDay
-              const pinned = pinA && pinA.site === s.id && pinA.landingDay === d && pinA.missionLength === missionLength
+              const pinned = pinA && !pinA.cell && pinA.site === s.id && pinA.landingDay === d && pinA.missionLength === missionLength
               return (
                 <button
                   key={d}

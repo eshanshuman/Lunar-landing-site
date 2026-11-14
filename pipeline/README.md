@@ -12,7 +12,7 @@ python -m pytest pipeline/tests
 |---|---|---|
 | 1 | `fetch_horizons.py` Sun/Earth az/el from JPL Horizons | Written, **not yet run against the live API** |
 | 2 | `build_horizons.py` 720-azimuth terrain masks from the LOLA DEM | Written, **not yet run on a real DEM**; maths unit-tested |
-| 3 | `build_grids.py` masks on a grid around each region | Not started |
+| 3 | `build_grids.py` hourly Sun/Earth visibility on a 41 x 41, 500 m grid around each Artemis region | Written, **not yet run on a real DEM**; per-point az/el conversion unit-tested |
 | 4 | `build_dataset.py` combine into `public/data/` (PLAN.md §6) | Not started |
 | 5 | `backtest.py` IM-1 and Chandrayaan-3 | Not started |
 
@@ -24,6 +24,13 @@ python pipeline/build_horizons.py --dem /path/to/dem.tif
 python pipeline/fetch_horizons.py --dry-run
 python pipeline/fetch_horizons.py --start 2027-06-01 --stop 2028-12-31
 ```
+
+```bash
+python pipeline/build_grids.py --dem /path/to/dem.tif --only ridge --max-dist-km 60
+```
+
+A full grid is 1681 horizon masks per region and is slow at the defaults; try one region with a
+shorter reach first. The output layout is documented on `GridData` in `src/types.ts`.
 
 Open TODOs are marked `TODO(pipeline)` in the scripts: the DEM product and its URL, the DEM height
 datum, the grid's central meridian, the Horizons azimuth convention and column layout, and the

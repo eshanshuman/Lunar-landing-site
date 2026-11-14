@@ -14,6 +14,7 @@ comms) are relative to the terrain horizon. Theme: **"What if we slip?"**
 | M1 2D panels on sample data | Done |
 | M2 3D Moon explorer | Done: globe, Sun lighting from the store's time, site pins, Earth marker, sight lines |
 | M3 Real data swap | Waiting on pipeline output |
+| Sunlight map | Panel done on a synthetic sample grid; `pipeline/build_grids.py` written, not yet run on real data |
 | M4 Intro cinematic | Done: 12 s, skippable (button, Esc, Enter, Space), plays once, "Replay intro" in the header, off under reduced motion |
 | P1 Pipeline v1 | Skeletons written; not yet run on real data (see `pipeline/README.md`) |
 
@@ -38,10 +39,11 @@ Python pipeline: see `pipeline/README.md`.
 
 ```
 reference/prototype.html   approved visual prototype (do not edit)
-src/data/                  sample.ts (synthetic) and dataset.ts (the one data entry point)
+src/data/                  sample.ts and sampleGrid.ts (synthetic), dataset.ts (the one data entry point)
+src/lib/grid.ts            Sunlight-map bits, hours per point, nearest better point (unit-tested)
 src/lib/visibility.ts      skyline interpolation, window stats, rise/set countdowns (unit-tested)
 src/state/store.ts         Zustand: site, landingDay, missionLength, t, pinA
-src/panels/                top bar, site evaluation, timeline, slip grid, sky view, scenario diff, why, data provenance
+src/panels/                hero, timeline, sunlight map, slip grid, sky view, scenario diff, why, data notes
 src/scenes/Moon/           3D Moon explorer (geo.ts holds the lat/lon and sky-direction maths, unit-tested)
 src/scenes/Intro/          intro cinematic: camera director, rocket, captions, seen-state
 public/textures/           NASA SVS CGI Moon Kit maps (see SOURCES.md)

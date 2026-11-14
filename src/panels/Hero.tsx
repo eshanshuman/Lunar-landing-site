@@ -1,9 +1,10 @@
 import { Component, Fragment, lazy, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { dataset, dayMs, siteById } from '../data/dataset'
+import { dataFor, dataset, dayMs, siteById } from '../data/dataset'
 import { fmtDur, pct } from '../lib/format'
 import { useTween } from '../lib/useTween'
 import { nextFlip, OK_FRACTION, status, windowStats } from '../lib/visibility'
-import { useStore } from '../state/store'
+import { useSiteData, useStore } from '../state/store'
+import { placeName } from './ScenarioDiff'
 import IntroOverlay from '../scenes/Intro/IntroOverlay'
 import Timeline from './Timeline'
 
@@ -93,7 +94,9 @@ export default function Hero() {
   }, [webgl, finishIntro])
 
   const s = siteById(site)
-  const d = dataset.bySite[site]
+  const d = useSiteData()
+  const cell = useStore((s) => s.cell)
+  const setCell = useStore((s) => s.setCell)
   const n = missionLength * 24
   const st = windowStats(d, landingDay * 24, n)
   const k = status(st)
@@ -105,8 +108,9 @@ export default function Hero() {
   const until = (h: number | null, soon: string) => (h === null ? 'for the rest of the data' : `${soon} ${fmtDur(h)}`)
 
   // Plan A is compared over the mission length selected now, like the comparison panel below.
-  const a = pinA ? windowStats(dataset.bySite[pinA.site], pinA.landingDay * 24, n) : null
-  const isA = !!pinA && pinA.site === site && pinA.landingDay === landingDay
+  const a = pinA ? windowStats(dataFor(pinA.site, pinA.cell), pinA.landingDay * 24, n) : null
+  const isA =
+    !!pinA && pinA.site === site && pinA.landingDay === landingDay && pinA.cell?.col === cell?.col && pinA.cell?.row === cell?.row
 
   let group: string | null = null
   return (
@@ -146,6 +150,14 @@ export default function Hero() {
         <h1 key={s.id} className="swap">
           {s.name}
         </h1>
+        {cell && (
+          <p className="picked swap" key={`${cell.col},${cell.row}`}>
+            Map point {placeName(site, cell).replace(` of ${s.name}`, '')} of the site.{' '}
+            <button className="link" onClick={() => setCell(null)}>
+              Back to {s.name}
+            </button>
+          </p>
+        )}
         <div className="verdict swap" key={verdict} aria-live="polite">
           <span className={`dot ${DOT[k]}`} />
           {verdict}
@@ -204,10 +216,10 @@ export default function Hero() {
           ) : (
             <>
               <span className="lbl">
-                {isA ? 'This is plan A.' : `Plan A: ${siteById(pinA.site).name}, ${shortDate(dayMs(pinA.landingDay))}.`}
+                {isA ? 'This is plan A.' : `Plan A: ${placeName(pinA.site, pinA.cell)}, ${shortDate(dayMs(pinA.landingDay))}.`}
               </span>
               {!isA && (
-                <button className="link" onClick={() => selectScenario(pinA.site, pinA.landingDay)}>
+                <button className="link" onClick={() => selectScenario(pinA.site, pinA.landingDay, pinA.cell)}>
                   Back to plan A
                 </button>
               )}
@@ -247,6 +259,7 @@ export default function Hero() {
 
       <div className="hero-links">
         {webgl && <button onClick={() => setRecentre((c) => c + 1)}>Centre on site</button>}
+        <a href="#map">Sunlight map</a>
         <a href="#slip">Compare landing dates</a>
       </div>
 

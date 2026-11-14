@@ -1,4 +1,6 @@
-import { dataset, dayMs, siteById } from '../data/dataset'
+import { dataFor, dayMs, gridFor, siteById } from '../data/dataset'
+import { describeMove } from '../lib/grid'
+import type { Cell } from '../types'
 import { fmtDate, fmtDur } from '../lib/format'
 import { windowStats } from '../lib/visibility'
 import { useStore } from '../state/store'
@@ -39,11 +41,20 @@ function FirstSunsetRow({ a, b }: { a: number | null; b: number | null }) {
   )
 }
 
+/** "Connecting ridge" or "1.5 km NE of Connecting ridge" for a picked map point. */
+export function placeName(site: string, cell: Cell | null) {
+  const g = cell ? gridFor(site) : null
+  if (!cell || !g) return siteById(site).name
+  const m = describeMove(g, cell)
+  return `${m.km.toFixed(1)} km ${m.dir} of ${siteById(site).name}`
+}
+
 export default function ScenarioDiff() {
   const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
   const missionLength = useStore((s) => s.missionLength)
   const pinA = useStore((s) => s.pinA)
+  const cell = useStore((s) => s.cell)
   const pin = useStore((s) => s.pin)
   const unpin = useStore((s) => s.unpin)
 
@@ -57,14 +68,15 @@ export default function ScenarioDiff() {
   } else {
     // Both plans are compared over the mission length currently selected.
     const n = missionLength * 24
-    const a = windowStats(dataset.bySite[pinA.site], pinA.landingDay * 24, n)
-    const b = windowStats(dataset.bySite[site], landingDay * 24, n)
+    const a = windowStats(dataFor(pinA.site, pinA.cell), pinA.landingDay * 24, n)
+    const b = windowStats(dataFor(site, cell), landingDay * 24, n)
+    const samePlace = site === pinA.site && cell?.col === pinA.cell?.col && cell?.row === pinA.cell?.row
     const dd = landingDay - pinA.landingDay
-    const what = site === pinA.site ? `slip ${dd >= 0 ? '+' : ''}${dd} d` : `${siteById(site).name}, ${fmtDate(dayMs(landingDay))}`
+    const what = samePlace ? `slip ${dd >= 0 ? '+' : ''}${dd} d` : `${placeName(site, cell)}, ${fmtDate(dayMs(landingDay))}`
     body = (
       <>
         <div className="lbl -mt-1 mb-1.5">
-          A: {siteById(pinA.site).name}, {fmtDate(dayMs(pinA.landingDay))} → B: {what}
+          A: {placeName(pinA.site, pinA.cell)}, {fmtDate(dayMs(pinA.landingDay))} → B: {what}
         </div>
         <Row k="Sunlight" a={a.sun} b={b.sun} higherIsBetter />
         <Row k="Earth contact" a={a.earth} b={b.earth} higherIsBetter />

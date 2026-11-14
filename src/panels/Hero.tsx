@@ -1,9 +1,10 @@
-import { Component, Fragment, lazy, Suspense, useCallback, useMemo, useState, type ReactNode } from 'react'
+import { Component, Fragment, lazy, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { dataset, dayMs, siteById } from '../data/dataset'
 import { fmtDur, pct } from '../lib/format'
 import { useTween } from '../lib/useTween'
 import { nextFlip, OK_FRACTION, status, windowStats } from '../lib/visibility'
 import { useStore } from '../state/store'
+import IntroOverlay from '../scenes/Intro/IntroOverlay'
 import Timeline from './Timeline'
 
 const MoonScene = lazy(() => import('../scenes/Moon/MoonScene'))
@@ -78,10 +79,18 @@ export default function Hero() {
   const setHoverSite = useStore((s) => s.setHoverSite)
   const pin = useStore((s) => s.pin)
   const unpin = useStore((s) => s.unpin)
+  const intro = useStore((s) => s.intro)
+  const revealed = useStore((s) => s.revealed)
+  const replayIntro = useStore((s) => s.replayIntro)
+  const finishIntro = useStore((s) => s.finishIntro)
   const [recentre, setRecentre] = useState(0)
   const [ready, setReady] = useState(false)
   const onReady = useCallback(() => setReady(true), [])
   const webgl = useMemo(hasWebGL, [])
+  // No 3D, no intro: go straight to the panels.
+  useEffect(() => {
+    if (!webgl && useStore.getState().intro) finishIntro()
+  }, [webgl, finishIntro])
 
   const s = siteById(site)
   const d = dataset.bySite[site]
@@ -101,8 +110,8 @@ export default function Hero() {
 
   let group: string | null = null
   return (
-    <section className="hero">
-      <div className={`hero-canvas${ready || !webgl ? ' ready' : ''}`}>
+    <section className={`hero${revealed ? '' : ' pre'}${intro ? ' in-intro' : ''}`}>
+      <div className={`hero-canvas${ready || intro || !webgl ? ' ready' : ''}`}>
         {webgl ? (
           <Boundary fallback={<NoWebGL />}>
             <Suspense fallback={null}>
@@ -113,11 +122,17 @@ export default function Hero() {
           <NoWebGL />
         )}
       </div>
-      {webgl && !ready && <div className="hero-msg loading">Loading the Moon…</div>}
+      {webgl && !ready && !intro && <div className="hero-msg loading">Loading the Moon…</div>}
+      <IntroOverlay />
 
       <header className="hero-top">
         <span className="wordmark">Lunar Landing Site Navigator</span>
-        {dataset.source === 'sample' && (
+        {webgl && !intro && (
+          <button className="link replay" onClick={replayIntro}>
+            Replay intro
+          </button>
+        )}
+        {dataset.source === 'sample' && !intro && (
           <span
             className="badge"
             title="The Sun and Earth tracks and the terrain skylines are synthetic stand-ins. Real JPL Horizons and LOLA data replace them when the pipeline lands. The Moon imagery is real."

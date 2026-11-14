@@ -13,7 +13,8 @@ comms) are relative to the terrain horizon. Theme: **"What if we slip?"**
 | M0 Scaffold | Done |
 | M1 2D panels on sample data | Done |
 | M2 3D Moon explorer | Done: globe, Sun lighting from the store's time, site pins, Earth marker, sight lines |
-| M3 Real data swap | Next, needs pipeline output |
+| M3 Real data swap | Waiting on pipeline output |
+| M4 Intro cinematic | Done: 12 s, skippable (button, Esc, Enter, Space), plays once, "Replay intro" in the header, off under reduced motion |
 | P1 Pipeline v1 | Skeletons written; not yet run on real data (see `pipeline/README.md`) |
 
 The Moon imagery is real NASA data. **All numbers in the app are currently synthetic** (`src/data/sample.ts`) and the header shows a
@@ -42,7 +43,7 @@ src/lib/visibility.ts      skyline interpolation, window stats, rise/set countdo
 src/state/store.ts         Zustand: site, landingDay, missionLength, t, pinA
 src/panels/                top bar, site evaluation, timeline, slip grid, sky view, scenario diff, why, data provenance
 src/scenes/Moon/           3D Moon explorer (geo.ts holds the lat/lon and sky-direction maths, unit-tested)
-src/scenes/Intro/          intro cinematic (M4, not built)
+src/scenes/Intro/          intro cinematic: camera director, rocket, captions, seen-state
 public/textures/           NASA SVS CGI Moon Kit maps (see SOURCES.md)
 pipeline/                  Python data pipeline
 public/data/               generated JSON consumed by the app (empty until the pipeline runs)

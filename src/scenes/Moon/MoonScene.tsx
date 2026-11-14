@@ -4,7 +4,7 @@
  * Sun / Earth azimuth and elevation at the store's time. Everything eases towards its
  * new place, so changing site, date or time never snaps.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Html, Line, OrbitControls, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
@@ -13,6 +13,7 @@ import { dataset, siteById } from '../../data/dataset'
 import { C } from '../../lib/theme'
 import { earthVisible, sunVisible } from '../../lib/visibility'
 import { useStore } from '../../state/store'
+import IntroDirector from '../Intro/IntroDirector'
 import { sitePosition, skyDirection } from './geo'
 
 const BASE = import.meta.env.BASE_URL
@@ -84,10 +85,12 @@ function Pins() {
             <ScreenScale>
               <mesh
                 onClick={(e) => {
+                  if (!useStore.getState().revealed) return
                   e.stopPropagation()
                   selectSite(s.id)
                 }}
                 onPointerOver={(e) => {
+                  if (!useStore.getState().revealed) return
                   e.stopPropagation()
                   setHover(s.id)
                   gl.domElement.style.cursor = 'pointer'
@@ -111,11 +114,10 @@ function Pins() {
                   <meshBasicMaterial color={C.text} side={THREE.DoubleSide} transparent opacity={on ? 1 : 0.6} />
                 </mesh>
               )}
-              {(on || hot) && (
-                <Html zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
-                  <div className={`pin-label${on ? ' on' : ''}`}>{s.name}</div>
-                </Html>
-              )}
+              {/* Always mounted; shown for the selected or hovered site. */}
+              <Html zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+                <div className={`pin-label${on ? ' on' : ''}${on || hot ? '' : ' off'}`}>{s.name}</div>
+              </Html>
             </ScreenScale>
           </group>
         )
@@ -125,10 +127,11 @@ function Pins() {
 }
 
 /** Sun light, Earth marker and the two sight lines for the selected site and time. */
-function Sky() {
+function Sky({ mounted }: { mounted: boolean }) {
   const site = useStore((s) => s.site)
   const landingDay = useStore((s) => s.landingDay)
   const t = useStore((s) => s.t)
+  const revealed = useStore((s) => s.revealed)
   const invalidate = useThree((s) => s.invalidate)
   const s = siteById(site)
   const d = dataset.bySite[site]
@@ -152,7 +155,7 @@ function Sky() {
   const earthMid = useRef<THREE.Group>(null)
   const tmp = useMemo(() => ({ a: new THREE.Vector3(), b: new THREE.Vector3() }), [])
 
-  useEffect(() => invalidate(), [site, i, invalidate])
+  useEffect(() => invalidate(), [site, i, revealed, mounted, invalidate])
 
   useFrame((_, dt) => {
     const to = target.current
@@ -187,7 +190,11 @@ function Sky() {
     <>
       <ambientLight intensity={0.035} />
       <directionalLight ref={light} intensity={3.4} />
-
+      {/* Hidden, not unmounted, until the intro reveals the interface. Labels stay mounted and switch with a class,
+          and nothing with a label mounts before the Moon is in: labels mounted on the very first frame
+          did not attach reliably. */}
+      {mounted && (
+      <group visible={revealed}>
       <Line ref={sunLine} points={O} color={sunClear ? C.sun : C.bad} lineWidth={sunClear ? 1.8 : 1.5} dashed={!sunClear} dashSize={0.045} gapSize={0.035} />
       <Line ref={earthLine} points={O} color={earthClear ? C.earth : C.bad} lineWidth={earthClear ? 1.8 : 1.5} dashed={!earthClear} dashSize={0.045} gapSize={0.035} />
 
@@ -198,11 +205,9 @@ function Sky() {
             <meshBasicMaterial color={C.sun} />
           </mesh>
         </ScreenScale>
-        {sunClear && (
-          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
-            <div className="los-label" style={{ color: C.sun }}>Sun</div>
-          </Html>
-        )}
+        <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+          <div className={`los-label${sunClear ? '' : ' off'}`} style={{ color: C.sun }}>Sun</div>
+        </Html>
       </group>
       {/* Earth is drawn in the right direction but much closer and larger than reality. */}
       <group ref={earthEnd}>
@@ -210,26 +215,22 @@ function Sky() {
           <sphereGeometry args={[0.06, 32, 32]} />
           <meshStandardMaterial color={C.earth} roughness={0.9} />
         </mesh>
-        {earthClear && (
-          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
-            <div className="los-label" style={{ color: C.earth }}>Earth</div>
-          </Html>
-        )}
+        <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+          <div className={`los-label${earthClear ? '' : ' off'}`} style={{ color: C.earth }}>Earth</div>
+        </Html>
       </group>
       <group ref={sunMid}>
-        {!sunClear && (
-          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
-            <div className="los-label blocked">Sun blocked by terrain</div>
-          </Html>
-        )}
+        <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+          <div className={`los-label blocked${sunClear ? ' off' : ''}`}>Sun blocked by terrain</div>
+        </Html>
       </group>
       <group ref={earthMid}>
-        {!earthClear && (
-          <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
-            <div className="los-label blocked">Earth blocked by terrain</div>
-          </Html>
-        )}
+        <Html zIndexRange={[4, 0]} style={{ pointerEvents: 'none' }}>
+          <div className={`los-label blocked${earthClear ? ' off' : ''}`}>Earth blocked by terrain</div>
+        </Html>
       </group>
+      </group>
+      )}
     </>
   )
 }
@@ -241,22 +242,32 @@ function cameraSpot(lat: number, lon: number, dist: number) {
   return up.addScaledVector(out, 0.3).normalize().multiplyScalar(dist)
 }
 
+const OPENING_DISTANCE = 4.7
+
 function CameraRig({ recentre }: { recentre: number }) {
   const site = useStore((s) => s.site)
+  const intro = useStore((s) => s.intro)
   const { camera, invalidate } = useThree()
   const target = useRef<THREE.Vector3 | null>(null)
   const first = useRef(true)
+  const wasIntro = useRef(intro)
 
   useEffect(() => {
     const s = siteById(site)
-    const dist = first.current ? 4.7 : THREE.MathUtils.clamp(camera.position.length(), 1.6, 5.5)
+    if (useStore.getState().intro) {
+      // The intro owns the camera. Choosing another site mid-intro ends it and glides there.
+      if (!first.current) useStore.getState().finishIntro()
+      first.current = false
+      return
+    }
+    const dist = first.current ? OPENING_DISTANCE : THREE.MathUtils.clamp(camera.position.length(), 1.6, 5.5)
     const spot = cameraSpot(s.lat, s.lon, dist)
     if (reducedMotion()) {
       camera.position.copy(spot)
       camera.lookAt(0, 0, 0)
       target.current = null
     } else {
-      // Opening move: start a little further out and settle in.
+      // Opening move without an intro: start a little further out and settle in.
       if (first.current) camera.position.copy(spot).multiplyScalar(1.22)
       target.current = spot
     }
@@ -264,9 +275,23 @@ function CameraRig({ recentre }: { recentre: number }) {
     invalidate()
   }, [site, recentre, camera, invalidate])
 
+  // Intro over (finished or skipped): glide to the opening view. If it finished, we are already there.
+  useEffect(() => {
+    if (wasIntro.current && !intro) {
+      const s = siteById(useStore.getState().site)
+      const spot = cameraSpot(s.lat, s.lon, OPENING_DISTANCE)
+      if (reducedMotion()) camera.position.copy(spot)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(0, 0, 0)
+      target.current = camera.position.distanceTo(spot) > 0.01 ? spot : null
+      invalidate()
+    }
+    wasIntro.current = intro
+  }, [intro, camera, invalidate])
+
   useFrame((_, dt) => {
     const to = target.current
-    if (!to) return
+    if (!to || useStore.getState().intro) return
     const k = 1 - Math.exp(-Math.min(dt, 1 / 30) * 3.2)
     const len = THREE.MathUtils.lerp(camera.position.length(), to.length(), k)
     camera.position.lerp(to, k).setLength(len)
@@ -277,6 +302,7 @@ function CameraRig({ recentre }: { recentre: number }) {
 
   return (
     <OrbitControls
+      enabled={!intro}
       enablePan={false}
       enableDamping
       dampingFactor={0.1}
@@ -291,7 +317,25 @@ function CameraRig({ recentre }: { recentre: number }) {
   )
 }
 
+/** Mounted only while the intro plays; it drives the shared camera to the explorer's opening view. */
+function Intro({ moonReady }: { moonReady: boolean }) {
+  const intro = useStore((s) => s.intro)
+  const finalSpot = useMemo(() => {
+    const s = siteById(useStore.getState().site)
+    return cameraSpot(s.lat, s.lon, OPENING_DISTANCE)
+    // Re-staged each time the intro (re)starts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intro])
+  return intro ? <IntroDirector moonReady={moonReady} finalSpot={finalSpot} /> : null
+}
+
 export default function MoonScene({ recentre, onReady }: { recentre: number; onReady: () => void }) {
+  const revealed = useStore((s) => s.revealed)
+  const [moonReady, setMoonReady] = useState(false)
+  const ready = useCallback(() => {
+    setMoonReady(true)
+    onReady()
+  }, [onReady])
   return (
     <Canvas
       frameloop="demand"
@@ -302,10 +346,19 @@ export default function MoonScene({ recentre, onReady }: { recentre: number; onR
       aria-label="3D Moon with site pins and Sun and Earth sight lines"
       role="img"
     >
-      <Moon onReady={onReady} />
-      <Pins />
-      <Sky />
+      {/* The Moon loads in its own boundary so the intro can start at Earth straight away. */}
+      <Suspense fallback={null}>
+        <Moon onReady={ready} />
+      </Suspense>
+      {/* Pins mount once the Moon is in; their labels did not attach reliably when mounted on the very first frame. */}
+      {moonReady && (
+        <group visible={revealed}>
+          <Pins />
+        </group>
+      )}
+      <Sky mounted={moonReady} />
       <CameraRig recentre={recentre} />
+      <Intro moonReady={moonReady} />
     </Canvas>
   )
 }

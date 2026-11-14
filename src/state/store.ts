@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { dataset } from '../data/dataset'
+import { introSeen, markIntroSeen, prefersReducedMotion } from '../scenes/Intro/introState'
 
 export interface Pin {
   site: string
@@ -23,6 +24,12 @@ interface State {
   speed: number
   /** Site under the pointer in the site list, so the 3D pin can light up. */
   hoverSite: string | null
+  /** The intro cinematic is playing. */
+  intro: boolean
+  /** Seconds into the intro (drives the captions). */
+  introTime: number
+  /** Site pins and the interface are on screen. False for the first part of the intro. */
+  revealed: boolean
 
   selectSite: (id: string) => void
   stepSite: (dir: 1 | -1) => void
@@ -33,11 +40,18 @@ interface State {
   togglePlay: () => void
   cycleSpeed: () => void
   setHoverSite: (id: string | null) => void
+  finishIntro: () => void
+  replayIntro: () => void
+  setRevealed: (v: boolean) => void
+  setIntroTime: (t: number) => void
   pin: () => void
   unpin: () => void
 }
 
 const lastHour = (missionLength: number) => missionLength * 24 - 1
+
+// First visit plays the intro. Reduced motion goes straight to the explorer.
+const playIntro = typeof window !== 'undefined' && !introSeen() && !prefersReducedMotion()
 
 export const useStore = create<State>((set) => ({
   site: 'ridge',
@@ -48,6 +62,9 @@ export const useStore = create<State>((set) => ({
   pinA: null,
   speed: 1,
   hoverSite: null,
+  intro: playIntro,
+  introTime: 0,
+  revealed: !playIntro,
 
   selectSite: (site) => set({ site }),
   stepSite: (dir) =>
@@ -63,6 +80,14 @@ export const useStore = create<State>((set) => ({
   togglePlay: () => set((s) => ({ playing: !s.playing })),
   cycleSpeed: () => set((s) => ({ speed: s.speed >= 4 ? 1 : s.speed * 2 })),
   setHoverSite: (hoverSite) => set({ hoverSite }),
+  finishIntro: () => {
+    markIntroSeen()
+    set({ intro: false, revealed: true, introTime: 0 })
+  },
+  replayIntro: () => set({ intro: true, revealed: false, introTime: 0, playing: false }),
+  setRevealed: (revealed) => set({ revealed }),
+  // Captions only change a few times, so skip the store update unless a tenth of a second has passed.
+  setIntroTime: (t) => set((s) => (Math.abs(t - s.introTime) >= 0.1 ? { introTime: t } : s)),
   pin: () => set((s) => ({ pinA: { site: s.site, landingDay: s.landingDay, missionLength: s.missionLength } })),
   unpin: () => set({ pinA: null }),
 }))

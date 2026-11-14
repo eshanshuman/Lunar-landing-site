@@ -14,6 +14,14 @@ function useKeyboard() {
       if (e.ctrlKey || e.metaKey || e.altKey) return
       const tag = (e.target as HTMLElement | null)?.tagName
       const s = useStore.getState()
+      if (s.intro) {
+        // Esc, Enter or Space skips the intro. A focused button handles Enter and Space itself.
+        if (e.key === 'Escape' || ((e.key === 'Enter' || e.key === ' ') && tag !== 'BUTTON')) {
+          s.finishIntro()
+          e.preventDefault()
+        }
+        return
+      }
       // Leave native behaviour alone where the focused control already uses the key.
       if (e.key === ' ' && tag !== 'BUTTON' && tag !== 'SELECT' && tag !== 'INPUT' && tag !== 'SUMMARY') s.togglePlay()
       else if (e.key === 'ArrowLeft' && tag !== 'INPUT' && tag !== 'SELECT') s.stepT(-1)

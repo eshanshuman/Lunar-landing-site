@@ -317,20 +317,97 @@
     font-weight: 600;
   }
 
+  /* ---------- intro ---------- */
+  .hero.pre .hero-left,
+  .hero.pre .hero-right,
+  .hero.pre .hero-bottom,
+  .hero.pre .hero-links {
+    visibility: hidden;
+  }
+  /* Full-bleed until the interface arrives; the frame eases up to make room for the timeline during the dive. */
+  .hero.pre .hero-canvas {
+    inset: 0;
+  }
+  .pin-label,
+  .los-label {
+    transition: opacity 0.8s ease;
+  }
+  .hero.pre .pin-label,
+  .hero.pre .los-label,
+  .pin-label.off,
+  .los-label.off {
+    opacity: 0;
+  }
+  .pin-label.off {
+    transition-duration: 0.15s;
+  }
+  .pin-label {
+    transition-duration: 0.25s;
+  }
+  .hero-canvas {
+    transition: opacity 1.4s ease, inset 1.2s ease;
+  }
+  .replay {
+    pointer-events: auto;
+  }
+  .intro {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .intro-skip {
+    position: absolute;
+    top: 16px;
+    right: 32px;
+    pointer-events: auto;
+    background: rgb(0 0 0 / 0.45);
+  }
+  .intro-caption {
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    bottom: 16%;
+    font-size: clamp(26px, 3.6vw, 52px);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    max-width: 18ch;
+    text-wrap: balance;
+    text-shadow: 0 2px 24px #000;
+    animation: caption 0.7s both ease-out;
+  }
+  .hero.in-intro:not(.pre) .intro-caption {
+    /* once the interface is in, the last caption steps aside for it */
+    left: 50%;
+    right: auto;
+    translate: -50% 0;
+    text-align: center;
+    bottom: 22%;
+    font-size: clamp(20px, 2vw, 28px);
+    max-width: none;
+    color: var(--color-muted);
+  }
+  @keyframes caption {
+    from {
+      opacity: 0;
+    }
+  }
+
   /* Motion: one entrance on load, then only in answer to what the user changes. */
   @media (prefers-reduced-motion: no-preference) {
-    .hero-left,
-    .hero-right,
-    .hero-bottom,
-    .hero-links {
-      animation: arrive 0.9s 0.35s both ease-out;
+    /* Starts when the interface is revealed: on load, or part-way through the intro. */
+    .hero:not(.pre) .hero-left,
+    .hero:not(.pre) .hero-right,
+    .hero:not(.pre) .hero-bottom,
+    .hero:not(.pre) .hero-links {
+      animation: arrive 0.9s 0.2s both ease-out;
     }
-    .hero-right {
-      animation-delay: 0.55s;
+    .hero:not(.pre) .hero-right {
+      animation-delay: 0.4s;
     }
-    .hero-bottom,
-    .hero-links {
-      animation-delay: 0.75s;
+    .hero:not(.pre) .hero-bottom,
+    .hero:not(.pre) .hero-links {
+      animation-delay: 0.6s;
     }
     .swap {
       animation: swap 0.35s both ease-out;

@@ -29,7 +29,17 @@ NASA SVS media is public domain; credit "NASA's Scientific Visualization Studio"
 - The elevation file's values are treated as kilometres relative to the 1737.4 km sphere (the app uses the
   range above for true-scale relief). TODO: confirm the unit on the SVS page before the demo.
 - TODO: confirm the licence wording on the SVS page and add the credit line to the app footer or README.
-- The Earth marker is a plain blue sphere, no texture yet. The rocket (M4) will be built from primitives.
+- The explorer's small Earth marker is a plain blue sphere. The intro's rocket is built from primitives in
+  `src/scenes/Intro/Rocket.tsx` (no imported model, no logos).
+
+Intro Earth (downloaded 2026-11-14, NASA SVS, public domain):
+
+| File in `public/textures/` | Downloaded from | Conversion |
+|---|---|---|
+| `earth_day_2k.jpg` | https://svs.gsfc.nasa.gov/vis/a000000/a003600/a003615/flat_earth03.jpg (SVS entry 3615) | Re-saved as JPEG (quality 86), 2048x1024 |
+| `earth_night_2k.jpg` | https://svs.gsfc.nasa.gov/vis/a030000/a030000/a030028/earthatnight2012.png (SVS entry 30028, "Earth at Night 2012") | Resized 5760x2880 to 2048x1024, PNG to JPEG (quality 86) |
+
+- TODO: confirm the credit lines on both SVS pages before the demo.
 
 ## Mission dates (backtest, M6)
 - TODO: IM-1 and Chandrayaan-3 landing and end-of-operations times, with primary sources.

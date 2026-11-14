@@ -5,6 +5,7 @@ import SkyView from './panels/SkyView'
 import SlipGrid from './panels/SlipGrid'
 import SunlightMap from './panels/SunlightMap'
 import TerrainPanel from './panels/TerrainPanel'
+import TimelineBar from './panels/TimelineBar'
 import ScenarioDiff from './panels/ScenarioDiff'
 import Explain from './panels/Explain'
 import DataNote from './panels/DataNote'
@@ -75,6 +76,7 @@ export default function App() {
           </section>
         </div>
       </main>
+      <TimelineBar />
     </>
   )
 }

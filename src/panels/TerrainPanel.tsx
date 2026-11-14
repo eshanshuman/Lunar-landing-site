@@ -73,7 +73,7 @@ export default function TerrainPanel() {
       {sample && <span className="tag-sample">Sun and Earth: sample data</span>}
       <span className="sub">
         The 20 km around {name} from NASA's LOLA elevation model, lit from where the Sun is at the time on the timeline.
-        Press play above and the shadows move.
+        Play the timeline and the shadows move.
       </span>
     </h2>
   )

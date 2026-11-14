@@ -281,13 +281,33 @@
     border-radius: 50%;
     flex: none;
   }
-  .hero-bottom {
-    position: absolute;
+  /* The timeline: fixed to the bottom of the window, no box, fading up from black. */
+  .timebar {
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 40px 32px 20px;
-    background: linear-gradient(to top, #000 55%, transparent);
+    z-index: 20;
+    padding: 44px 32px 14px;
+    background: linear-gradient(to top, #000 65%, transparent);
+    pointer-events: none; /* the fade never blocks what is behind it */
+  }
+  .timebar.pre {
+    visibility: hidden;
+  }
+  .timebar-in {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    pointer-events: auto;
+  }
+  .timebar-where {
+    flex: none;
+    max-width: 240px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    animation: arrive 0.3s both ease-out;
   }
   .hero-links {
     position: absolute;
@@ -345,7 +365,6 @@
   /* ---------- intro ---------- */
   .hero.pre .hero-left,
   .hero.pre .hero-right,
-  .hero.pre .hero-bottom,
   .hero.pre .hero-links {
     visibility: hidden;
   }
@@ -423,15 +442,15 @@
     /* Starts when the interface is revealed: on load, or part-way through the intro. */
     .hero:not(.pre) .hero-left,
     .hero:not(.pre) .hero-right,
-    .hero:not(.pre) .hero-bottom,
-    .hero:not(.pre) .hero-links {
+    .hero:not(.pre) .hero-links,
+    .timebar:not(.pre) {
       animation: arrive 0.9s 0.2s both ease-out;
     }
     .hero:not(.pre) .hero-right {
       animation-delay: 0.4s;
     }
-    .hero:not(.pre) .hero-bottom,
-    .hero:not(.pre) .hero-links {
+    .hero:not(.pre) .hero-links,
+    .timebar:not(.pre) {
       animation-delay: 0.6s;
     }
     .swap {
@@ -500,7 +519,8 @@
   .page {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 24px 32px 96px;
+    /* Room for the fixed timeline, so it never covers the last section. */
+    padding: 24px 32px 190px;
   }
   .band {
     display: grid;
@@ -843,10 +863,11 @@
     .hero-right .group-h {
       width: 100%;
     }
-    .hero-bottom {
-      position: static;
-      padding: 12px 20px 24px;
-      background: none;
+    .timebar {
+      padding: 36px 16px 10px;
+    }
+    .timebar-where {
+      display: none;
     }
     .hero-links {
       display: none;
@@ -856,7 +877,7 @@
       height: 62vh;
     }
     .page {
-      padding: 0 20px 64px;
+      padding: 0 20px 170px;
     }
     .band {
       grid-template-columns: 1fr;

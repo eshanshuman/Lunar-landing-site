@@ -306,7 +306,7 @@ export default function SunlightMap() {
           )}
         </div>
         <p className="note mt-3">
-          {mode === 'now' ? 'Follows the timeline: press play above to watch the shadows move.' : `From landing day, ${n} hours.`}
+          {mode === 'now' ? 'Follows the timeline: play it to watch the shadows move.' : `From landing day, ${n} hours.`}
         </p>
 
         {gridSource === 'pipeline' && (

@@ -6,7 +6,6 @@ import { nextFlip, OK_FRACTION, status, windowStats } from '../lib/visibility'
 import { useSiteData, useStore } from '../state/store'
 import { placeName } from './ScenarioDiff'
 import IntroOverlay from '../scenes/Intro/IntroOverlay'
-import Timeline from './Timeline'
 import { PRESETS } from '../data/presets'
 import { prefersReducedMotion as reduceMotion } from '../scenes/Intro/introState'
 
@@ -277,10 +276,6 @@ export default function Hero() {
         <a href="#terrain">3D shadows</a>
         <a href="#map">Sunlight map</a>
         <a href="#slip">Compare landing dates</a>
-      </div>
-
-      <div className="hero-bottom">
-        <Timeline />
       </div>
     </section>
   )

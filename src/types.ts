@@ -58,7 +58,13 @@ export interface GridData {
   earth: Uint8Array
   /** Ground height at each point, metres. Only used to shade the map's backdrop. */
   height_m?: ArrayLike<number>
-  meta: { dem: string; observer_height_m: number; ephemeris: string }
+  meta: {
+    dem: string
+    observer_height_m: number
+    ephemeris: string
+    /** Share of hours (0..1) in which the grid's centre point matches the site's own, finer skyline. */
+    centre_agreement?: { sun: number; earth: number } | null
+  }
 }
 
 /** A point on a region's grid. */

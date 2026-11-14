@@ -38,6 +38,11 @@ Every number used in the app, deck or pitch must appear here with a source, or c
 - Highest skyline from the tile alone vs the full mask maximum: ridge 1.79° vs 2.04° · shack 1.04° vs 1.04° · degerl 2.50° vs 2.85° · peak 0.80° vs 1.05° · nobile 12.53° vs 12.70°.
 - The 20 m file is 30,400 × 30,400 pixels of 32-bit floats, cloud-optimised with overviews; address: https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF (linked from the PGDA product 90 page).
 
+- **Sunlight-map grids (real, `pipeline/build_grids.py`, `LDEM_80S_80MPP_ADJ.TIF`, 2 m observer, October 2028 window, 1,008 h):** share of all point-hours in sunlight across each 20 km map — ridge 36.8% · shack 27.7% · degerl 37.3% · peak 38.9% · nobile 33.9%.
+- **80 m grid vs 20 m site skyline at the same point (hours of 1,008 with the Sun in view):** ridge 631 vs 688 · shack 1008 vs 1008 · degerl 1008 vs 840 · peak 1008 vs 1008 · nobile 288 vs 286. Hour-by-hour agreement: Sun ridge 94.0%, shack 100%, degerl 83.3%, peak 100%, nobile 99.8%; Earth ridge 98.5%, shack 100%, degerl 99.9%, peak 99.5%, nobile 100%. Mean skyline difference (80 m minus 20 m): ridge +0.10°, shack −0.02°, degerl −0.32°, peak −0.24°, nobile −0.07°. So the map is optimistic at de Gerlache and slightly pessimistic at Connecting ridge; do not quote small map gains as exact.
+- Example map suggestion on real data (default view, landing 2028-10-16, 10 days): Nobile rim 1 has 147 h of 240 h sunlight on the map (146 h on the 20 m skyline); the nearest square reaching 75% is 1.4 km NE with 187 h (+40 h).
+- The 80 m file is 7,600 × 7,600 pixels, 189 MB: https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF (linked from the PGDA product 90 page).
+
 ## Data products
 - Terrain: PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023). Cloud-optimised GeoTIFFs, south polar stereographic, MOON_ME frame of DE421, heights in metres. Files: `LDEM_80S_20MPP_ADJ`, `LDEM_80S_80MPP_ADJ`, `LDEM_60S_60MPP_ADJ`, `LDEM_60S_240MPP_ADJ`, hillshade `LDEM_80S_80MPP_ADJ_HILL`. Source: [PGDA product 90](https://pgda.gsfc.nasa.gov/products/90)
 - Ephemeris: JPL Horizons API, observer tables, `CENTER='coord@301'`, `COORD_TYPE='GEODETIC'`, targets 10 (Sun) and 399 (Earth), `QUANTITIES='4'`, hourly; azimuth clockwise from north.

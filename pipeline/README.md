@@ -12,7 +12,7 @@ python -m pytest pipeline/tests
 |---|---|---|
 | 1 | `fetch_horizons.py` Sun/Earth az/el from JPL Horizons | Written, **not yet run against the live API** |
 | 2 | `build_horizons.py` 720-azimuth terrain masks from the LOLA DEM | Written, **not yet run on a real DEM**; maths unit-tested |
-| 3 | `build_grids.py` hourly Sun/Earth visibility on a 41 x 41, 500 m grid around each Artemis region | Written, **not yet run on a real DEM**; per-point az/el conversion unit-tested |
+| 3 | `build_grids.py` hourly Sun/Earth visibility on a 41 x 41, 500 m grid around each Artemis region | **Run for the five Artemis sites on the 80 m DEM**; outputs committed in `public/data/` |
 | 3b | `build_tile.py` 20 km terrain tile (16-bit PNG + JSON) per site for the 3D shadow view | **Run for the five Artemis sites**; outputs committed in `public/data/` |
 | 4 | `build_dataset.py` combine into `public/data/` (PLAN.md §6) | Not started |
 | 5 | `backtest.py` IM-1 and Chandrayaan-3 | Not started |
@@ -27,11 +27,12 @@ python pipeline/fetch_horizons.py --start 2027-06-01 --stop 2028-12-31
 ```
 
 ```bash
-python pipeline/build_grids.py --dem /path/to/dem.tif --only ridge --max-dist-km 60
+python pipeline/build_grids.py --dem /path/to/LDEM_80S_80MPP_ADJ.TIF --dataset public/data/dataset.json
 ```
 
-A full grid is 1681 horizon masks per region and is slow at the defaults; try one region with a
-shorter reach first. The output layout is documented on `GridData` in `src/types.ts`.
+A full grid is 1681 horizon masks per region: about 8 minutes per region on the 80 m file
+(run the regions in parallel with `--only <id>`). `--dataset` takes the Sun/Earth tracks and the time
+window from the app's own dataset, so the grid always matches it. The output layout is documented on `GridData` in `src/types.ts`.
 
 Open TODOs are marked `TODO(pipeline)` in the scripts: the DEM product and its URL, the DEM height
 datum, the grid's central meridian, the Horizons azimuth convention and column layout, and the

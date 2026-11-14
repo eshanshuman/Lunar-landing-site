@@ -35,7 +35,12 @@ export default function DataNote() {
           <li>Sun and Earth positions: {sample ? 'synthetic (?sample view).' : 'JPL Horizons API, hourly, no atmosphere, observer 2 m above the ground.'}</li>
           <li>Terrain skylines: {sample ? 'synthetic (?sample view).' : 'LOLA LDEM_80S_20MPP_ADJ (Artemis sites) and LDEM_60S_60MPP_ADJ (past landings), PGDA product 90 (Barker et al. 2023).'}</li>
           <li>3D shadow view terrain: real. NASA LOLA 20 m elevation model (PGDA product 90), 20 km tiles at 39 m per pixel.</li>
-          <li>Sunlight map: synthetic grid and relief today. Planned: the same LOLA model, 41 x 41 points every 500 m.</li>
+          <li>
+            Sunlight map:{' '}
+            {gridSource === 'sample'
+              ? 'synthetic grid and relief (?sample view).'
+              : 'LOLA LDEM_80S_80MPP_ADJ (80 m per pixel), 41 x 41 points every 500 m, each with its own skyline traced out to 150 km. The centre square uses the site\'s finer 20 m skyline.'}
+          </li>
           <li>Moon colour and relief: NASA SVS CGI Moon Kit (LRO camera and LOLA), public domain.</li>
           <li>Site coordinates: carried over from the prototype and not yet checked against published papers. Shackleton rim was moved 1.9 km onto the rim crest using the terrain model.</li>
         </ul>

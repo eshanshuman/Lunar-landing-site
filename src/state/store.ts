@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { dataFor, dataset, gridFor } from '../data/dataset'
+import { dataFor, dataset, gridFor, onGridsChanged } from '../data/dataset'
 import { isCentre } from '../lib/grid'
 import { PRESETS } from '../data/presets'
 import type { Cell } from '../types'
@@ -32,6 +32,8 @@ interface State {
   backtestPick: number
   /** Site under the pointer in the site list, so the 3D pin can light up. */
   hoverSite: string | null
+  /** Goes up each time a Sunlight-map grid finishes loading, so views that read grids redraw. */
+  gridTick: number
   /** The intro cinematic is playing. */
   intro: boolean
   /** Seconds into the intro (drives the captions). */
@@ -75,6 +77,7 @@ export const useStore = create<State>((set) => ({
   pinA: null,
   speed: 1,
   hoverSite: null,
+  gridTick: 0,
   backtestPick: 0,
   intro: playIntro,
   introTime: 0,
@@ -126,3 +129,5 @@ export const useStore = create<State>((set) => ({
 
 /** Data for what is selected now: the named site, or the map point picked on it. */
 export const useSiteData = () => useStore((s) => dataFor(s.site, s.cell))
+
+onGridsChanged(() => useStore.setState((s) => ({ gridTick: s.gridTick + 1 })))

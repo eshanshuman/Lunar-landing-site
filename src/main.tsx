@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/instrument-sans'
 import './index.css'
 import App from './App'
+import { loadGrids } from './data/dataset'
+
+// The Sunlight-map grids are fetched in the background; everything else is already in the bundle.
+loadGrids()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

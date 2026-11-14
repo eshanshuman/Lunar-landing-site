@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import { dataset, gridFor, gridSource, siteById } from '../data/dataset'
+import { dataset, gridFor, gridSource, gridStatus, siteById } from '../data/dataset'
 import { fmtDur, pct } from '../lib/format'
 import { bit, centreCell, describeMove, nearestBetter, pointIndex, visibleHours } from '../lib/grid'
 import { C, FONT } from '../lib/theme'
-import { OK_FRACTION, type Body } from '../lib/visibility'
+import { OK_FRACTION, windowStats, type Body } from '../lib/visibility'
 import { useStore } from '../state/store'
 import type { Cell, GridData } from '../types'
 import Tooltip, { type TipState } from './Tooltip'
@@ -30,7 +30,8 @@ function hillshade(g: GridData): Float32Array {
       const k = 3
       const nx = -dzdE * k, ny = -dzdN * k, nz = 1
       const len = Math.hypot(nx, ny, nz)
-      out[r * n + c] = Math.max(0, Math.min(1, (nx * -0.5 + ny * 0.5 + nz * 0.707) / len))
+      const v = (nx * -0.5 + ny * 0.5 + nz * 0.707) / len
+      out[r * n + c] = Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.5 // a hole in the DEM stays mid-grey
     }
   return out
 }
@@ -47,7 +48,9 @@ export default function SunlightMap() {
   const [body, setBody] = useState<Body>('sun')
   const [tip, setTip] = useState<TipState | null>(null)
 
-  const g = useMemo(() => gridFor(site), [site])
+  const gridTick = useStore((s) => s.gridTick)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const g = useMemo(() => gridFor(site), [site, gridTick])
   const shade = useMemo(() => (g ? hillshade(g) : null), [g])
   const n = missionLength * 24
   const s0 = landingDay * 24
@@ -194,7 +197,11 @@ export default function SunlightMap() {
   const heading = (
     <h2>
       Sunlight map
-      {(dataset.source === 'sample' || gridSource === 'sample') && <span className="tag-sample">Sample data</span>}
+      {dataset.source === 'sample' || gridSource === 'sample' ? (
+        <span className="tag-sample">Sample data</span>
+      ) : (
+        <span className="tag-real">Real LOLA terrain, 80 m</span>
+      )}
       <span className="sub">
         The 20 km around {name}, one square every 500 m. A short move can change how much {B.word} a lander gets.
         Pick a square to try that point.
@@ -208,7 +215,11 @@ export default function SunlightMap() {
         <section className="card" id="map">
           {heading}
           <p className="note">
-            There is no map around {name} yet. Maps cover the Artemis study regions; pick one of those sites to see it.
+            {gridStatus(site) === 'loading'
+              ? 'Loading the map…'
+              : gridStatus(site) === 'error'
+                ? 'The map for this site could not be loaded. Reload the page to try again.'
+                : `There is no map around ${name}. Maps cover the Artemis study regions; pick one of those sites to see it.`}
           </p>
         </section>
         <div />
@@ -217,6 +228,11 @@ export default function SunlightMap() {
   }
 
   const refHours = hours[pointIndex(g, ref)]
+  // The verdict at the top of the page uses the site's 20 m skyline; this map uses 80 m terrain for every square.
+  const siteStats = windowStats(dataset.bySite[site], s0, n)
+  const siteHours = body === 'sun' ? siteStats.sun : siteStats.earth
+  const centreHours = hours[pointIndex(g, centreCell(g))]
+  const agree = g.meta.centre_agreement?.[body]
   return (
     <>
       <section className="card" id="map">
@@ -293,9 +309,24 @@ export default function SunlightMap() {
           {mode === 'now' ? 'Follows the timeline: press play above to watch the shadows move.' : `From landing day, ${n} hours.`}
         </p>
 
+        {gridSource === 'pipeline' && (
+          <p className="note mt-3">
+            <b>Coarser than the verdict.</b> Every square here is worked out from 80 m terrain; the verdict at the top of
+            the page uses 20 m terrain for the site itself. For this mission the map gives {name} {centreHours} h of{' '}
+            {B.word} and the 20 m skyline gives {siteHours} h.
+            {agree !== undefined && agree !== null && (
+              <>
+                {' '}
+                Over the whole data window the two agree in {pct(agree)}% of hours at this site.
+                {agree < 0.99 && ' Small gains suggested here are within that margin, so treat them with caution.'}
+              </>
+            )}
+          </p>
+        )}
+
         <h2 className="mt-7">Nearest better point</h2>
         <p className="note" aria-live="polite">
-          {cell ? `From the point you picked` : `At ${name}`}: <b>{refHours} h</b> of {n} h with {B.word} ({pct(refHours / n)}%).
+          {cell ? `From the point you picked` : `At ${name}, on this map`}: <b>{refHours} h</b> of {n} h with {B.word} ({pct(refHours / n)}%).
         </p>
         {better ? (
           <>

@@ -14,7 +14,7 @@ comms) are relative to the terrain horizon. Theme: **"What if we slip?"**
 | M1 2D panels on sample data | Done |
 | M2 3D Moon explorer | Done: globe, Sun lighting from the store's time, site pins, Earth marker, sight lines |
 | M3 Real data swap | Waiting on pipeline output |
-| Sunlight map | Panel done on a synthetic sample grid; `pipeline/build_grids.py` written, not yet run on real data |
+| Sunlight map | Done on real grids for the five Artemis sites (LOLA 80 m terrain, `pipeline/build_grids.py`) |
 | 3D LOLA shadow predictor | Done on real LOLA terrain tiles for the five Artemis sites; Sun direction is still sample data until M3 |
 | M4 Intro cinematic | Done: 12 s, skippable (button, Esc, Enter, Space), plays once, "Replay intro" in the header, off under reduced motion |
 | P1 Pipeline v1 | Skeletons written; not yet run on real data (see `pipeline/README.md`) |

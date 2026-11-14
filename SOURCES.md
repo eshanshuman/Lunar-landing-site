@@ -14,6 +14,10 @@ the primary source.
 - TODO: date fetched, and the two spot-checks against the Horizons web UI.
 
 ## Terrain
+- **Sunlight-map grids** (`public/data/grid_<site>.json`, built 2026-11-14 by `pipeline/build_grids.py`):
+  skylines from `LDEM_80S_80MPP_ADJ.TIF`, https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF (80 m per pixel,
+  same PGDA product 90); Sun and Earth directions from the JPL Horizons tracks in `public/data/dataset.json`,
+  converted to each point's local frame. Sites: ridge, shack, degerl, peak, nobile.
 - **3D shadow view tiles** (`public/data/tile_<site>.png` + `.json`, built 2026-11-14 by `pipeline/build_tile.py`):
   cut from `LDEM_80S_20MPP_ADJ.TIF`, https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF,
   linked from PGDA product 90, "A New View of the Lunar South Pole from LOLA" (Barker et al. 2023),

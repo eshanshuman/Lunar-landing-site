@@ -8,6 +8,7 @@ import ScenarioDiff from './panels/ScenarioDiff'
 import Explain from './panels/Explain'
 import DataNote from './panels/DataNote'
 import Backtest from './panels/Backtest'
+import { NightPlanner, SkyBlocked } from './panels/NightSky'
 
 /** Space = play/pause, ←/→ = step hours, ↑/↓ = change site (PLAN.md §8). */
 function useKeyboard() {
@@ -57,6 +58,10 @@ export default function App() {
         <div className="band">
           <SkyView />
           <Explain />
+        </div>
+        <div className="band">
+          <NightPlanner />
+          <SkyBlocked />
         </div>
         <div className="band">
           <DataNote />

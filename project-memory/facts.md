@@ -30,6 +30,7 @@ Every number used in the app, deck or pitch must appear here with a source, or c
 - Ground heights (m above the 1,737.4 km sphere): ridge 1945.3 · shack 1738.4 (after snap to rim) · degerl 1793.8 · peak 1646.5 · nobile 5944.5 · im1 2593.0 · ch3 528.5.
 - JPL Horizons values agree with an independent DE421 + IAU Moon-orientation calculation to within 0.01° (ridge and degerl, six dates, 2027–2028). Example checks at 2027-10-20 00:00 UTC: ridge (−89.4632, 222.51°E) Sun az 79.14 el 1.61, Earth az 133.89 el 4.15; degerl (−88.6834, 292.07°E) Sun az 9.57 el 2.80, Earth az 64.41 el 5.09.
 - Seasons at the Artemis sites (our data, 10-day missions, ≥75% sunlight and ≥75% Earth contact = good; 140 site-dates per 4-week block): March–May 2028 is the dark season (as few as 1–7 good, 80–91 bad); late Sep–Oct 2028 is the best (40–42 good, 19 bad); Dec 2027 is in between (~38 good, ~47 bad).
+- Sky hidden by terrain (our skylines, share of the sky above the local horizontal): ridge 1.2%, shack <0.1%, degerl 1.2%, peak 0.2%, nobile 10.2%, im1 8.4%, ch3 2.3%.
 - Sunlight 2027-10-19 → 11-02 (Sun's upper limb above the terrain skyline): ridge 92.6%, degerl 89.0%.
 
 ## Data products

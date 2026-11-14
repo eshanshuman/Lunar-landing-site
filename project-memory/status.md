@@ -1,7 +1,9 @@
 # Status
 
-## Now (2026-11-15 02:15 IST)
-**App (branch `claude/vibrant-thompson-kpf3hb`):** intro cinematic, 3D Moon explorer, verdict + countdowns, timeline, slip grid, plan compare, sky view, explain mode, Shadow Vision + nearest better point. **M3 done: the app runs on real data** (JPL Horizons tracks + LOLA skylines for all 7 sites, October 2028 demo window, `public/data/dataset.json` from `pipeline/build_dataset.py`). Only the Sunlight map (P2 grids) is still sample and keeps its badge. `?sample` in the URL shows the old synthetic data. The **Backtest panel** (IM-1 + Chandrayaan-3) reads `public/data/backtest.json`. **Presets** (scope 6) and **installable PWA** (scope 7: manifest, original moon icon, service worker; checked offline reload) are done.
+## Now (2026-11-15 02:15 IST, updated 02:20)
+**App (branch `claude/vibrant-thompson-kpf3hb`):** intro cinematic, 3D Moon explorer, verdict + countdowns, timeline, slip grid, plan compare, sky view, explain mode, Shadow Vision + nearest better point. **M3 done: the app runs on real data** (JPL Horizons tracks + LOLA skylines for all 7 sites, October 2028 demo window, `public/data/dataset.json` from `pipeline/build_dataset.py`). Only the Sunlight map (P2 grids) is still sample and keeps its badge. `?sample` in the URL shows the old synthetic data. The **Backtest panel** (IM-1 + Chandrayaan-3) reads `public/data/backtest.json`. **Presets** (scope 6) and **installable PWA** (scope 7: manifest, original moon icon, service worker; checked offline reload) are done. **Tier C 11 (Survive the night) and 12 (Sky hidden by terrain)** are done (`src/panels/NightSky.tsx`, `src/lib/night.ts`, tested).
+
+**Claude Code (laptop) is building the 3D LOLA shadow predictor** with remote windowed reads of the 20 m DEM from PGDA (no local file needed), so it can also build the P2 grids.
 
 **Team right now: Osho only** (with Claude in the claude.ai Project and Claude Code on the laptop).
 
@@ -27,5 +29,5 @@
 
 ## Next
 1. Claude Code on the laptop (needs the 20 m DEM, 2.7 GB, too big for the cloud chat): 3D LOLA shadow predictor (scope 4) and P2 grids for the Sunlight map (scope 3).
-2. Claude in the Project: Tier C 11 (survive-the-night) and 12 (sky blocked %), then refresh deck screenshots with real data.
+2. Claude in the Project: refresh deck screenshots with real data (Tier C 11 and 12 done).
 3. Tier C 8–10 need the grids / 3D scene, so they follow step 1.

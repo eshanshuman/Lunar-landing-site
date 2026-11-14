@@ -1,7 +1,7 @@
 # Lunar Landing Site Navigator — Build Plan (final, v1)
 
 NASA Space Apps 2026 · Challenge: **Lunar Landing Site Navigator** (CLPS) · Hackathon: 14–15 Nov 2026
-Team: Osho (app lead), Akshat + Rohan (data pipeline), everyone (story/pitch)
+Team: Osho (app lead), Garima + Avin (data pipeline), everyone (story/pitch)
 
 ---
 
@@ -114,7 +114,7 @@ The prototype's synthetic generator produces this same shape. **Keep it as `src/
 | M0 | Scaffold: Vite+React+TS+R3F+Tailwind+Zustand, deploy pipeline, sample data wired | Osho + Claude Code | Blank app deploys; store works |
 | M1 | **Port the 2D panels** from the prototype into React (slip grid, sky view, timeline, countdowns, diff, explain) on sample data | Claude Code | Matches prototype visually; all interactions work |
 | M2 | **3D Moon explorer:** globe, real-sun lighting from the store's time, site pins, select → panels update, Earth marker, sight lines | Claude Code | Clicking a pin or scrubbing time moves the light and the lines |
-| P1 | **Pipeline v1:** Horizons fetch + horizon masks for 5 Artemis sites + 2 past landings | Akshat + Rohan (parallel to M0–M2) | `site_*.json` validated; SOURCES.md written |
+| P1 | **Pipeline v1:** Horizons fetch + horizon masks for 5 Artemis sites + 2 past landings | Garima + Avin (parallel to M0–M2) | `site_*.json` validated; SOURCES.md written |
 | M3 | **Real data swap:** load pipeline JSON, keep sample as fallback, remove "sample" badge only for real-data sites | Claude Code | Grid colours come from real data |
 | M4 | **Intro cinematic** (Scene 0) with skip, reduced-motion, preload | Claude Code | ≤ 12 s, 60 fps on a laptop, seamless hand-off |
 | M5 | **South Pole terrain close-up** (LOLA tile mesh + shadows) | Claude Code + data lane | Zoom-in swaps to terrain without a pop |

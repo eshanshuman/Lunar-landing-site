@@ -104,7 +104,7 @@ export function SkyBlocked() {
   return (
     <section className="card aside">
       <h2>Sky hidden by terrain</h2>
-      <p className="verdict" style={{ marginTop: 0 }}>{f * 100 < 0.1 ? '< 0.1' : (f * 100).toFixed(1)}%</p>
+      <p style={{ fontSize: 30, lineHeight: 1.2, margin: "4px 0 6px" }}>{f * 100 < 0.1 ? '< 0.1' : (f * 100).toFixed(1)}%</p>
       <p className="note">
         of the sky above {siteById(site).name}&rsquo;s horizontal is hidden behind the skyline. The highest ridge stands{' '}
         {max.toFixed(1)}° up, toward azimuth {Math.round(maxAz)}°.

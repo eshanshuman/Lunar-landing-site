@@ -34,7 +34,9 @@
 
 **Z.ai parallel research (GLM chat):** use only as a cross-check and for write-up material. Its sunlight numbers roughly agree with ours (Oct 2027: ridge 92.6% ours vs 100% its C1; degerl 89.0% vs 89.6%), but its Earth-visibility numbers are wrong (0% at rim sites where our verified data shows Earth ~5° up), its 41 × 41 map had visible/blocked inverted, and its terrain is 118 m vs our 20 m. Do not put its numbers in the app.
 
-**Pitch material:** web presentation (claude.ai artifact, 9 slides with 3D morphs), `Lunar_Site_Navigator_Pitch_Clean.pptx` (8 static slides). Both still show sample-data screenshots.
+**Pitch material:** `Lunar_Site_Navigator_Pitch_Real.pptx` (9 static slides, real-data screenshots: hero on the Artemis preset, slip grid + plan compare (−163 h Earth contact for a 5→12 Oct slip), sky view (Earth sinks ~7° below the horizon), 3D shadows, IM-1 backtest, survive-the-night). The web presentation artifact and the older pptx files still show sample data.
+
+**External critique (Gemini, 2026-11-15) triage:** already handled: precomputed static data, 720-direction LOLA horizon masks, Horizons queried topocentric at body-fixed site coordinates (verified to 0.01°), both 3D canvases use `frameloop="demand"`. Worth doing: (a) quantitative uncertainty section in About the data (ephemeris window and step, ±30 min from hourly steps, DEM resolution per site, coordinate uncertainty); (b) a 'marginal' state when the Sun/Earth clears the skyline by less than ~0.3°; (c) laptop FPS check (globe 360×180 sphere with displacement + terrain 520k triangles, 4096 shadow map). Rejected as out of scope/no data: plume-ejecta hazard matrix, Ar-40/volatile transients, boulder hazards.
 
 ## Next
 1. 3D LOLA shadow predictor (scope 4) is done. Still open from Tier A: P2 grids for the Sunlight map (scope 3). The 20 m and 80 m DEMs can be read window by window from the PGDA https address (cloud-optimised GeoTIFF), so the grids no longer need the laptop's copy; `build_grids.py` still wants `ephem_<site>.json`, which is only in the laptop's `pipeline/cache/`.

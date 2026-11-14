@@ -28,3 +28,4 @@
 - 2026-11-14: `build_tile.py --dem` accepts the PGDA https address as well as a local path, so tiles can be rebuilt without the 3.7 GB file.
 - 2026-11-14: In the 3D shadow predictor the observer stands on the site's full-resolution ground height (`site_height_m` in the tile JSON), not the 39 m averaged tile centre. With the average, ridge showed 4.7% of hours where the tile blocked the Sun and the horizon mask did not; with the fix it is 0 at every site.
 - 2026-11-14: Service worker pre-caches the terrain tiles (cache `lsn-v2`) so the 3D view works offline for all five sites.
+- 2026-11-15: Pitch deck refreshed to real data (Pitch_Real.pptx). Slip slide uses Shackleton 5→12 Oct (−163 h Earth contact); the cause shown honestly as libration (Earth ~7° below the horizon), not a ridge. Gemini critique triaged in status.md; plume/volatile/boulder hazards stay out of scope.

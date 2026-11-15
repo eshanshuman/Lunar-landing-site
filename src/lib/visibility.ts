@@ -26,6 +26,25 @@ export const isVisible = (d: SiteData, which: Body, i: number) => {
 export const sunVisible = (d: SiteData, i: number) => isVisible(d, 'sun', i)
 export const earthVisible = (d: SiteData, i: number) => isVisible(d, 'earth', i)
 
+/**
+ * Apparent radius of each disc as seen from the Moon, degrees (sources in project-memory/facts.md).
+ * Sun: 695,700 km at 1 au is 0.2665 deg; 0.267 matches pipeline/backtest.py. Earth: 6,371 km at the
+ * mean distance of 384,400 km is 0.950 deg (about 0.90 to 1.00 between apogee and perigee).
+ */
+export const DISC_RADIUS_DEG: Record<Body, number> = { sun: 0.267, earth: 0.95 }
+
+/**
+ * Is the disc partly behind the skyline at step i? True when the centre is within one disc radius
+ * of the skyline, above or below. The centre test (`isVisible`) still decides in view / blocked;
+ * this only marks the hours where that answer is a close call.
+ * Map points carry visibility bits but no skyline, so they are never marked.
+ */
+export function isMarginal(d: SiteData, which: Body, i: number): boolean {
+  if (d.vis) return false
+  const tr: Track = d[which]
+  return Math.abs(tr.el[i] - horizonAt(d.horizon_deg, tr.az[i])) < DISC_RADIUS_DEG[which]
+}
+
 export interface WindowStats {
   /** Steps in the window (hours when step_h is 1). */
   n: number
@@ -39,6 +58,10 @@ export interface WindowStats {
   maxGap: number
   /** Steps from landing to the first step without Sun; null if the Sun never sets in the window. */
   firstSet: number | null
+  /** Steps with the Sun's disc partly behind the skyline (counted whichever side the centre is on). */
+  sunMarginal: number
+  /** The same for Earth's disc. */
+  earthMarginal: number
 }
 
 /** Stats over [start, start + length), clipped to the data that exists. */
@@ -46,7 +69,10 @@ export function windowStats(d: SiteData, start: number, length: number): WindowS
   const end = Math.min(start + length, d.sun.el.length)
   let sun = 0, earth = 0, dark = 0, maxDark = 0, gap = 0, maxGap = 0
   let firstSet: number | null = null
+  let sunMarginal = 0, earthMarginal = 0
   for (let i = start; i < end; i++) {
+    if (isMarginal(d, 'sun', i)) sunMarginal++
+    if (isMarginal(d, 'earth', i)) earthMarginal++
     if (sunVisible(d, i)) {
       sun++
       dark = 0
@@ -64,7 +90,7 @@ export function windowStats(d: SiteData, start: number, length: number): WindowS
     }
   }
   const n = Math.max(0, end - start)
-  return { n, sun, earth, sunF: n ? sun / n : 0, earthF: n ? earth / n : 0, maxDark, maxGap, firstSet }
+  return { n, sun, earth, sunF: n ? sun / n : 0, earthF: n ? earth / n : 0, maxDark, maxGap, firstSet, sunMarginal, earthMarginal }
 }
 
 export const OK_FRACTION = 0.75

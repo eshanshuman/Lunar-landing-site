@@ -1,12 +1,11 @@
 import { dayMs, siteById } from '../data/dataset'
 import { fmtDate } from '../lib/format'
 import { C, FONT } from '../lib/theme'
-import { isVisible, type Body } from '../lib/visibility'
+import { DISC_RADIUS_DEG, isMarginal, isVisible, type Body } from '../lib/visibility'
 import { useSiteData, useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 
 /** Mean angular radius of the Sun seen from the Moon, degrees (0.53° diameter). */
-const SUN_RADIUS_DEG = 0.265
 
 export default function SkyView() {
   const site = useStore((s) => s.site)
@@ -96,6 +95,8 @@ export default function SkyView() {
       for (let i = s0; i < s1 - 1; i++) {
         if (Math.abs(az[i + 1] - az[i]) > 180) continue // wraps across north
         const v = isVisible(d, which, i)
+        // Marginal: the disc straddles the skyline. Same colour as its side of the line, but lighter.
+        g.globalAlpha = isMarginal(d, which, i) ? 0.45 : 1
         g.strokeStyle = v ? col : C.bad
         g.setLineDash(v ? [] : [2, 4])
         g.beginPath()
@@ -103,14 +104,16 @@ export default function SkyView() {
         g.lineTo(X(az[i + 1]), Y(el[i + 1]))
         g.stroke()
       }
+      g.globalAlpha = 1
       g.setLineDash([])
     }
     track('sun', C.sun)
     track('earth', C.earth)
 
-    // Bodies at the scrubber time. Sun at true angular size on the vertical scale, 4 px floor.
+    // Bodies at the scrubber time, each at its true angular size on the vertical scale (with a small floor).
     const i = Math.min(s0 + t, s1 - 1)
-    const sunR = Math.max(4, (SUN_RADIUS_DEG / (hi - lo)) * ph)
+    const sunR = Math.max(4, (DISC_RADIUS_DEG.sun / (hi - lo)) * ph)
+    const earthR = Math.max(5, (DISC_RADIUS_DEG.earth / (hi - lo)) * ph)
     g.fillStyle = C.sun
     g.shadowColor = C.sun
     g.shadowBlur = 14
@@ -120,7 +123,7 @@ export default function SkyView() {
     g.shadowBlur = 0
     g.fillStyle = C.earth
     g.beginPath()
-    g.arc(X(d.earth.az[i]), Y(d.earth.el[i]), Math.max(5, sunR * 1.2), 0, 7)
+    g.arc(X(d.earth.az[i]), Y(d.earth.el[i]), earthR, 0, 7)
     g.fill()
     g.strokeStyle = C.bg
     g.lineWidth = 1.5
@@ -141,6 +144,7 @@ export default function SkyView() {
         <span><i style={{ background: 'var(--color-sun)' }} />Sun path, visible</span>
         <span><i style={{ background: 'var(--color-earth)' }} />Earth path, visible</span>
         <span><i style={{ background: 'var(--color-bad)' }} />Blocked by terrain</span>
+        <span><i style={{ background: 'var(--color-text)', opacity: 0.45 }} />Lighter stretch: disc partly behind the skyline</span>
         <span><i style={{ background: 'var(--color-rock)' }} />Terrain skyline</span>
         {picked && (
           <span className="w-full">

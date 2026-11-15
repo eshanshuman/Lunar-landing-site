@@ -45,7 +45,7 @@ const shortDate = (ms: number) => new Date(ms).toLocaleDateString('en-GB', { day
 const VERDICT = ['Poor window', '', 'Good window'] as const
 const DOT = ['g0', 'g1', 'g2'] as const
 
-function Meter({ label, f, colour, deltaH, title }: { label: string; f: number; colour: string; deltaH: number | null; title: string }) {
+function Meter({ label, f, colour, deltaH, marginal, title }: { label: string; f: number; colour: string; deltaH: number | null; marginal: number; title: string }) {
   const shown = useTween(f * 100)
   return (
     <div className="meter" title={title}>
@@ -64,6 +64,11 @@ function Meter({ label, f, colour, deltaH, title }: { label: string; f: number; 
       <div className="meter-bar">
         <i style={{ width: `${f * 100}%`, background: colour }} />
       </div>
+      {marginal > 0 && (
+        <div className="meter-note" title="Hours when the disc is partly behind the skyline: the centre is within one disc radius of the terrain, above or below. They are already counted as in view or blocked by where the centre is.">
+          {marginal} h marginal, disc partly behind the skyline
+        </div>
+      )}
     </div>
   )
 }
@@ -173,6 +178,7 @@ export default function Hero() {
           f={st.sunF}
           colour="var(--color-sun)"
           deltaH={a && !isA ? st.sun - a.sun : null}
+          marginal={st.sunMarginal}
           title={`Share of the mission with the Sun above the terrain. A good window needs ${pct(OK_FRACTION)}%. ${src}`}
         />
         <Meter
@@ -180,6 +186,7 @@ export default function Hero() {
           f={st.earthF}
           colour="var(--color-earth)"
           deltaH={a && !isA ? st.earth - a.earth : null}
+          marginal={st.earthMarginal}
           title={`Share of the mission with Earth above the terrain. A good window needs ${pct(OK_FRACTION)}%. ${src}`}
         />
 

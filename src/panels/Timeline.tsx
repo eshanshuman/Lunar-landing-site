@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { dayMs } from '../data/dataset'
 import { fmtDT, fmtDur } from '../lib/format'
 import { C, FONT } from '../lib/theme'
-import { isVisible, type Body } from '../lib/visibility'
+import { isMarginal, isVisible, type Body } from '../lib/visibility'
 import { useSiteData, useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 import Tooltip, { type TipState } from './Tooltip'
@@ -70,19 +70,23 @@ export default function Timeline() {
       g.beginPath()
       g.roundRect(X(0), y + 3, pw, 2, 1)
       g.fill()
-      // Runs of consecutive hours in view
+      // Runs of consecutive hours in the same state: clear, marginal (disc partly behind the skyline,
+      // drawn lighter on whichever side the centre is), or blocked (nothing drawn).
+      const state = (k: number) => (isVisible(d, which, s0 + k) ? 2 : 0) + (isMarginal(d, which, s0 + k) ? 1 : 0)
+      const ALPHA = [0, 0.26, 1, 0.58] // blocked, blocked-marginal, clear, in-view-marginal
       let k = 0
       while (k < n) {
-        if (!isVisible(d, which, s0 + k)) {
-          k++
-          continue
-        }
+        const st = state(k)
         let e = k
-        while (e < n && isVisible(d, which, s0 + e)) e++
-        g.fillStyle = col
-        g.beginPath()
-        g.roundRect(X(k), y, Math.max(2, X(e) - X(k)), BAR_H, 4)
-        g.fill()
+        while (e < n && state(e) === st) e++
+        if (st !== 0) {
+          g.globalAlpha = ALPHA[st]
+          g.fillStyle = col
+          g.beginPath()
+          g.roundRect(X(k), y, Math.max(2, X(e) - X(k)), BAR_H, 2)
+          g.fill()
+          g.globalAlpha = 1
+        }
         k = e
       }
     }
@@ -111,6 +115,8 @@ export default function Timeline() {
     return Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - r.left - LABEL_W) / (r.width - LABEL_W - 8)) * n)))
   }
   const scrubTo = (e: React.PointerEvent<HTMLCanvasElement>) => setT(hourAt(e))
+  const say = (which: Body, i: number) =>
+    (isVisible(d, which, i) ? 'in view' : 'behind terrain') + (isMarginal(d, which, i) ? ', disc partly hidden' : '')
   const showTip = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const h = hourAt(e)
     const i = Math.min(s0 + h, d.sun.el.length - 1)
@@ -121,13 +127,9 @@ export default function Timeline() {
         <>
           <b>{fmtDT(dayMs(landingDay) + h * 36e5)}</b>
           <br />
-          <span className={isVisible(d, 'sun', i) ? 'text-sun' : 'text-bad'}>
-            Sun {isVisible(d, 'sun', i) ? 'in view' : 'behind terrain'}
-          </span>
+          <span className={isVisible(d, 'sun', i) ? 'text-sun' : 'text-bad'}>Sun {say('sun', i)}</span>
           <br />
-          <span className={isVisible(d, 'earth', i) ? 'text-earth' : 'text-bad'}>
-            Earth {isVisible(d, 'earth', i) ? 'in view' : 'behind terrain'}
-          </span>
+          <span className={isVisible(d, 'earth', i) ? 'text-earth' : 'text-bad'}>Earth {say('earth', i)}</span>
         </>
       ),
     })

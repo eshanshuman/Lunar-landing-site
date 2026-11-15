@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { SiteData } from '../types'
 import { sampleDataset } from '../data/sample'
-import { earthVisible, horizonAt, nextFlip, status, sunVisible, windowStats } from './visibility'
+import { DISC_RADIUS_DEG, earthVisible, horizonAt, isMarginal, nextFlip, status, sunVisible, windowStats } from './visibility'
 
 /** Site with a flat skyline at `horizon` degrees and hand-written Sun / Earth elevations. */
 function site(sunEl: number[], earthEl: number[] = sunEl.map(() => 5), horizon: number[] = [0, 0, 0, 0]): SiteData {
@@ -138,5 +138,37 @@ describe('sample dataset', () => {
     const { buildSampleSite } = await import('../data/sample')
     const a = buildSampleSite(sampleDataset.sites[0])
     expect(Array.from(a.horizon_deg)).toEqual(Array.from(sampleDataset.bySite[a.id].horizon_deg))
+  })
+})
+
+describe('marginal hours', () => {
+  // Flat skyline at 1 degree. The Sun's disc radius is 0.267 degrees, Earth's 0.95.
+  const d = site([2, 1.3, 1.26, 1.1, 0.9, 0.74, 0.7, 0], [3, 2.0, 1.9, 1.0, 0.1, 0.04, -1, -1], [1, 1, 1, 1])
+
+  it('uses the apparent radius of each disc as seen from the Moon', () => {
+    expect(DISC_RADIUS_DEG.sun).toBeCloseTo(0.267, 3)
+    expect(DISC_RADIUS_DEG.earth).toBeCloseTo(0.95, 2)
+  })
+  it('marks an hour when the centre is within one radius of the skyline, above or below', () => {
+    //                 el:  2     1.3    1.26  1.1   0.9   0.74   0.7    0
+    expect([0, 1, 2, 3, 4, 5, 6, 7].map((i) => isMarginal(d, 'sun', i))).toEqual([false, false, true, true, true, true, false, false])
+    //                 el:  3     2.0    1.9   1.0   0.1   0.04   -1    -1
+    expect([0, 1, 2, 3, 4, 5, 6, 7].map((i) => isMarginal(d, 'earth', i))).toEqual([false, false, true, true, true, false, false, false])
+  })
+  it('does not change in view / blocked, the percentages or the grid colour', () => {
+    const st = windowStats(d, 0, 8)
+    expect([0, 1, 2, 3, 4, 5, 6, 7].map((i) => sunVisible(d, i))).toEqual([true, true, true, true, false, false, false, false])
+    expect(st).toMatchObject({ n: 8, sun: 4, earth: 3, sunF: 0.5, maxDark: 4, firstSet: 4 })
+    expect(st.sunMarginal).toBe(4)
+    expect(st.earthMarginal).toBe(3)
+  })
+  it('counts only inside the window', () => {
+    expect(windowStats(d, 0, 2).sunMarginal).toBe(0)
+    expect(windowStats(d, 2, 2).sunMarginal).toBe(2)
+  })
+  it('never marks a map point, which has visibility bits but no skyline', () => {
+    const picked = { ...d, vis: { sun: new Uint8Array([0xff]), earth: new Uint8Array([0xff]) } }
+    expect(isMarginal(picked, 'sun', 3)).toBe(false)
+    expect(windowStats(picked, 0, 8).sunMarginal).toBe(0)
   })
 })

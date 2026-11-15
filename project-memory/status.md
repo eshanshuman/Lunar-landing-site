@@ -1,11 +1,23 @@
 # Status
 
-## Now (2026-11-14 21:07 UTC)
+## Now (2026-11-15 02:31 UTC)
 **App (branch `claude/vibrant-thompson-kpf3hb`):** intro cinematic, 3D Moon explorer, verdict + countdowns, timeline, slip grid, plan compare, sky view, explain mode, Shadow Vision + nearest better point, **3D LOLA shadow predictor (scope 4, real terrain + real Sun)**. **M3 done: the app runs on real data** (JPL Horizons tracks + LOLA skylines for all 7 sites, October 2028 demo window, `public/data/dataset.json` from `pipeline/build_dataset.py`). **P2 done: the Sunlight map runs on real terrain too**, so nothing in the default view is sample data any more. `?sample` in the URL shows the old synthetic data. The **Backtest panel** (IM-1 + Chandrayaan-3) reads `public/data/backtest.json`. **Presets** (scope 6) and **installable PWA** (scope 7: manifest, original moon icon, service worker; checked offline reload) are done. **Tier C 11 (Survive the night) and 12 (Sky hidden by terrain)** are done (`src/panels/NightSky.tsx`, `src/lib/night.ts`, tested).
 
 **Heads-up on duplicate work:** this file said Claude Code on the laptop was building the 3D LOLA shadow predictor. The Claude Code cloud session has now built and pushed it (details below). If the laptop session also has one in progress, do not merge a second copy; compare and keep one. The laptop session can go straight to the P2 grids.
 
 **Team right now: Osho only** (with Claude in the claude.ai Project and Claude Code on the laptop).
+
+**Interface and honesty pass — done 2026-11-15** (Claude Code cloud session, 2026-11-15 02:31 UTC; eight steps, each tested, checked in the browser, committed and pushed):
+1. **Timeline bar** is fixed to the bottom of the window (`src/panels/TimelineBar.tsx`): no box, fade from black, clicks pass through the fade, and it shows "Site · date" once the first screen has scrolled away. Page padding keeps it off the last section.
+2. **Colours and labels:** amber now only means the Sun. Slip grid "one falls short" is a neutral hatch (site dots: a grey ring). Static labels such as "Terrain: real LOLA" are plain muted text; outlines are for controls only.
+3. **3D terrain fill light:** optional "Shadow detail (visual aid)" toggle (ambient +0.09) with its caption; shadows and verdict logic untouched.
+4. **`SOURCES.md` rewritten:** all three DEM files with the PGDA product 90 link, citation and DOIs, the exact JPL Horizons settings, every texture address, mission-date sources, and the Shackleton rim snapping note.
+5. **About the data** shows real numbers read from the loaded data: window and step, ±30 min timing error, terrain resolution per use (20 m, 60 m, 80 m, 39 m), the 0.01° Horizons cross-check, and that site coordinates are unverified.
+6. **Marginal hours:** an hour is marginal when the Sun's or Earth's disc is partly behind the skyline (`isMarginal` in `src/lib/visibility.ts`, radii 0.267° and 0.95°). Shown as a count by the hero meters, a lighter tint in the timeline and sky view, and in the timeline tooltip. In view / blocked, the percentages and all slip-grid colours are unchanged (checked before and after).
+7. **Visual polish:** 2px radius on all controls; slip grid 1px cells, 2px gaps, day ticks on top; Sunlight map with seamless squares, a clean dark-to-gold ramp, a faint 5 km grid and km axis labels; hairline frames with ticks on the map and 3D view; key numbers larger and lighter.
+8. **Instrument details:** live readouts under the Sky view (azimuth, elevation, skyline there) and the Sunlight map (km east/north, that square's lit hours); corner reticle ticks; every panel's subtitle is one short line and its method and caveats are in a "Method and sources" fold-out. The short honesty lines stay visible (tile-only shadows, coarser-than-verdict, energy only, geometry only, height stretched, far ridge).
+- Final check passed: every panel, both presets (Artemis IV scenario reads 100% / 100%; IM-1 opens the backtest), play, offline reload, first-visit intro, phone width. 90 JS tests, 37 Python tests.
+- Not checked: frame rate on a real GPU. The disc-size constants in `facts.md` were not re-opened at their source pages (see that file).
 
 **Sunlight map grids (scope 3, P2) — done 2026-11-14, on real data** (Claude Code cloud session, 2026-11-14 21:07 UTC):
 - `public/data/grid_<site>.json` for ridge, shack, degerl, peak, nobile: 41 × 41 points every 500 m, 1,008 hourly Sun and Earth bits per point, ~578 KB each, committed. Built by `pipeline/build_grids.py --dem LDEM_80S_80MPP_ADJ.TIF --dataset public/data/dataset.json`: each point gets its own 720-direction skyline out to 150 km, and the site's Horizons az/el is converted into the point's local frame. Sun and Earth tracks come from `dataset.json`, so no laptop cache was needed.
@@ -36,7 +48,7 @@
 1. ~~Share the data~~ done: the bundled outputs are committed in `public/data/`. Raw cache still only on the laptop (re-run `build_dataset.py` / `backtest.py` there after any pipeline change).
 2. `fetch_horizons.py` overwrites `ephem_<site>.json` per run; give each window its own output file before the backtest panel is built.
 3. `build_dataset.py`, `backtest.py` and `build_grids.py` are done and their outputs are in `public/data/`. Rebuild the grids after any change to the demo window in `dataset.json` (their hours must match; the app refuses a grid that does not).
-4. `SOURCES.md`: add both DEM files, the PGDA link, and the shack snapping note.
+4. ~~`SOURCES.md`~~ done: all three DEM files, PGDA link and citation, Horizons settings, textures, rim snapping note.
 5. All site coordinates still need published sources. Candidates from the Z.ai research (verify in the papers first): Gläser et al. 2018 Connecting Ridge C1 (−89.4505°, 222.84°E, 0.4 km from `ridge`) and C2 (−89.3157°, 245.94°E); Bussey et al. 2010 (Icarus, doi:10.1016/j.icarus.2010.03.028) Points A–D, e.g. Shackleton Pt A 89.68°S 166.0°W, de Gerlache Pt C 88.71°S 68.7°W (about 1 km from `degerl`); `peak` may be Bussey Point D.
 6. Possible extra backtest with a documented answer: Apollo 15 and 17 Sun elevation at touchdown (reported ~12.0° and ~13.3°; verify from mission records before use).
 
@@ -50,5 +62,5 @@
 
 ## Next
 1. Tiers A and B are complete: real data everywhere, 3D shadow predictor, backtest, presets, PWA. Check the 3D views at 60 fps on a laptop.
-2. Deck refreshed (done). Critique items (a) uncertainty section and (b) marginal state deferred to tomorrow (Osho near his usage limit; priority is a working demo).
+2. Deck refreshed (done). Critique items (a) uncertainty section and (b) marginal state are now done. Deck screenshots predate the interface pass and should be retaken.
 3. Tier C 8–10 (base siting, lit route, infrastructure shadows) are now unblocked: the real grids and the 3D terrain scene both exist. Base siting over a year would need grids for a longer window than October 2028.

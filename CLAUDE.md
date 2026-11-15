@@ -13,7 +13,7 @@ An installable app (PWA) that plans Moon landings at the lunar south pole for th
 - Only build features listed in `project-memory/scope.md` (which extends `PLAN.md` §3), in its tier order. If something seems missing, ask before adding scope. Follow each feature's honesty rule.
 - Original 3D models only (the rocket is built from primitives). NASA public-domain textures for the Earth and Moon; record every asset URL in `SOURCES.md`.
 - The intro must be skippable from frame 1 and respect `prefers-reduced-motion`.
-- Visual language (updated 2026-11-13 after design feedback; supersedes the prototype's look and PLAN.md §8 fonts/colours): the 3D Moon fills the first screen on black with one plain-language verdict; detail panels sit below the fold. Warm neutral greys, one typeface (Instrument Sans), sentence case, no boxed dashboards. Colour only for meaning, in softened tones (Sun #EFB54F, Earth #82B4E8, good #6CBF90, blocked #DB6450); tokens live in `src/index.css`. `reference/prototype.html` remains the reference for behaviour and data shape, not for styling.
+- Visual language (updated 2026-11-13 after design feedback; supersedes the prototype's look and PLAN.md §8 fonts/colours): the 3D Moon fills the first screen on black with one plain-language verdict; detail panels sit below the fold. Warm neutral greys, one typeface (Instrument Sans), sentence case, no boxed dashboards, 2px radius on controls, outlines only on things you can click. Colour only for meaning (amber is the Sun and nothing else), in softened tones (Sun #EFB54F, Earth #82B4E8, good #6CBF90, blocked #DB6450); tokens live in `src/index.css`. `reference/prototype.html` remains the reference for behaviour and data shape, not for styling.
 - Wrap localStorage in try/catch. The app must work if storage is unavailable.
 
 ## Stack
@@ -27,7 +27,7 @@ Vite + React + TypeScript · React Three Fiber + drei · Zustand · Tailwind · 
 /src/scenes/Intro/          # Scene 0 cinematic
 /src/scenes/Moon/           # Scene 1 3D explorer
 /src/scenes/Terrain/        # 3D LOLA shadow predictor (terrain tile, shadow-mapped Sun)
-/src/panels/                # hero (verdict + sites + timeline), slip grid, sky view, diff, explain, data notes
+/src/panels/                # hero (verdict + sites), fixed timeline bar, slip grid, sky view, diff, explain, data notes
 /src/state/store.ts         # Zustand: site, landingDay, missionLength, t, pinA
 /src/lib/visibility.ts      # horizon interpolation, window stats, next-flip countdowns
 /src/lib/terrainShadow.ts   # terrain tiles: heights, line of sight inside a tile, tile-vs-skyline check

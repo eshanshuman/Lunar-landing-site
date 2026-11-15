@@ -32,3 +32,9 @@
 - 2026-11-14: Sunlight-map grids are built from the 80 m DEM (`LDEM_80S_80MPP_ADJ`), not the 20 m one: 1,681 skylines to 150 km per site at 20 m is ~900 MB of terrain per site; at 80 m each site takes about 8 minutes of compute.
 - 2026-11-14: Every grid square, including the centre, uses the 80 m DEM. An earlier build overwrote the centre with the site's 20 m answer; that made "move X km → +Y h" compare 20 m against 80 m terrain, so it was undone. The map and the verdict can therefore show different hours for the same site; the panel states both and the measured agreement.
 - 2026-11-14: Grids are fetched at start-up from `public/data/` (not bundled) and pre-cached by the service worker; `build_grids.py --dataset` takes the Sun/Earth tracks and window from `dataset.json` so the grid always matches the app's window.
+- 2026-11-15: The timeline lives in a fixed bottom bar, not in the hero, so play and scrub are always in reach. Wording that pointed "above" was removed.
+- 2026-11-15: Amber is reserved for the Sun. "One falls short" in the slip grid and site list is a neutral hatch or ring. Static labels are plain text; only controls have outlines.
+- 2026-11-15: Marginal hours use fixed apparent radii (Sun 0.267°, Earth 0.95°) and are an extra annotation only. In view / blocked stays "centre above the skyline", so percentages, slip-grid colours, the backtest and existing tests are unchanged.
+- 2026-11-15: Each panel keeps one short honesty line on screen and moves the longer method and caveat text into a "Method and sources" fold-out. Nothing was deleted; the fold-outs hold the full wording.
+- 2026-11-15: The 3D view's fill light is off by default and labelled as a visual aid when on. It only raises ambient light; shadow mapping and the tile-vs-skyline verdict are untouched.
+- 2026-11-15: Controls use a 2px radius (was fully rounded). The Sunlight map's hover tooltip was replaced by a readout line under the map.

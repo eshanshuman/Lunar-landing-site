@@ -31,6 +31,15 @@ export default function SlipGrid() {
       {/* Scrolls sideways on narrow screens instead of widening the page. Padding keeps the selection outline unclipped. */}
       <div className="-m-1 overflow-x-auto p-1">
       <div className="grid-slip" style={{ gridTemplateColumns: `minmax(96px, 160px) repeat(${dataset.days}, minmax(14px, 1fr))` }}>
+        {/* Day ticks sit above the squares, like a chart axis. */}
+        <div className="cl" style={{ textAlign: 'left' }}>
+          Landing day, {new Date(dayMs(0)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' })}
+        </div>
+        {DAYS.map((d) => (
+          <div key={d} className={`cl${d === landingDay ? ' on' : ''}`}>
+            {d % 3 === 0 || d === landingDay ? new Date(dayMs(d)).getUTCDate() : ''}
+          </div>
+        ))}
         {dataset.sites.map((s, r) => (
           <div key={s.id} className="contents">
             <div className={`rl${s.id === site ? ' on' : ''}`}>{s.name}</div>
@@ -66,14 +75,6 @@ export default function SlipGrid() {
                 />
               )
             })}
-          </div>
-        ))}
-        <div className="cl" style={{ textAlign: 'left' }}>
-          Landing day, {new Date(dayMs(0)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' })}
-        </div>
-        {DAYS.map((d) => (
-          <div key={d} className={`cl${d === landingDay ? ' on' : ''}`}>
-            {d % 3 === 0 || d === landingDay ? new Date(dayMs(d)).getUTCDate() : ''}
           </div>
         ))}
       </div>

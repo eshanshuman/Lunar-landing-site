@@ -9,7 +9,14 @@ import type { Cell, GridData } from '../types'
 import Tooltip, { type TipState } from './Tooltip'
 import { useCanvas } from './useCanvas'
 
-const SIZE = 520
+const SIZE = 560
+/** Room around the map for the km ticks and labels. */
+const PAD = { l: 54, r: 10, t: 10, b: 40 }
+/** The square the map is drawn in, inside a canvas of w x h CSS pixels. */
+function plotBox(w: number, h: number) {
+  const side = Math.floor(Math.min(w - PAD.l - PAD.r, h - PAD.t - PAD.b))
+  return { ox: PAD.l + Math.floor((w - PAD.l - PAD.r - side) / 2), oy: PAD.t, side }
+}
 const BODY: Record<Body, { rgb: string; word: string; gain: string }> = {
   sun: { rgb: '239,181,79', word: 'sunlight', gain: 'sunlight' },
   earth: { rgb: '130,180,232', word: 'Earth in view', gain: 'Earth link' },
@@ -67,29 +74,77 @@ export default function SunlightMap() {
 
   const canvasRef = useCanvas(SIZE, (ctx, w, h) => {
     if (!g || !shade || !hours || !ref) return
-    const side = Math.min(w, h)
-    const ox = (w - side) / 2
-    const cs = side / g.size
+    const { ox, oy, side } = plotBox(w, h)
     const hourNow = Math.min(s0 + t, g.hours - 1)
-    const X = (c: number) => ox + c * cs
-    const Y = (r: number) => r * cs
-    const mid = (c: Cell): [number, number] => [X(c.col) + cs / 2, Y(c.row) + cs / 2]
+    // Whole-pixel cell edges, so neighbouring squares meet exactly: no seams and no overlap lines.
+    const edge = (k: number) => Math.round((k * side) / g.size)
+    const X = (c: number) => ox + edge(c)
+    const Y = (r: number) => oy + edge(r)
+    const cs = side / g.size
+    const mid = (c: Cell): [number, number] => [ox + (c.col + 0.5) * cs, oy + (c.row + 0.5) * cs]
+    const [R, G, Bl] = B.rgb.split(',').map(Number)
 
     for (let r = 0; r < g.size; r++)
       for (let c = 0; c < g.size; c++) {
         const p = r * g.size + c
-        const v = Math.round(22 + shade[p] * 70)
-        ctx.fillStyle = `rgb(${v},${v - 1},${v - 3})`
-        ctx.fillRect(X(c), Y(r), cs + 0.5, cs + 0.5)
-        if (mode === 'now') {
-          ctx.fillStyle = bit(g, body, p, hourNow) ? `rgba(${B.rgb},0.6)` : 'rgba(0,0,0,0.58)'
-        } else {
-          const f = hours[p] / n
-          // One hue: the more hours in view, the more colour; little or none stays dark.
-          ctx.fillStyle = f > 0.5 ? `rgba(${B.rgb},${(0.12 + (f - 0.5) * 1.4).toFixed(3)})` : `rgba(0,0,0,${(0.6 - f * 0.9).toFixed(3)})`
-        }
-        ctx.fillRect(X(c), Y(r), cs + 0.5, cs + 0.5)
+        // In view: 0..1. "Right now" is all or nothing; "whole mission" is the share of hours.
+        const f = mode === 'now' ? (bit(g, body, p, hourNow) ? 1 : 0) : hours[p] / n
+        // One clean ramp from near-black straight to the body's colour (eased so low values stay dark),
+        // with the relief as a gentle brightness change rather than a grey layer underneath.
+        const k = Math.pow(f, 1.6)
+        const relief = 0.82 + shade[p] * 0.36
+        const ch = (dark: number, full: number) => Math.round(Math.min(255, (dark + (full - dark) * k) * relief))
+        ctx.fillStyle = `rgb(${ch(20, R)},${ch(19, G)},${ch(18, Bl)})`
+        ctx.fillRect(X(c), Y(r), X(c + 1) - X(c), Y(r + 1) - Y(r))
       }
+
+    // Faint 5 km grid, a hairline frame, and km ticks and labels on the bottom and left edges.
+    const kmToPx = (km: number) => ((km * 1000) / g.spacing_m + g.size / 2) * cs
+    const halfKm = (g.size * g.spacing_m) / 2000
+    ctx.lineWidth = 1
+    ctx.font = `11px ${FONT}`
+    ctx.fillStyle = C.dim
+    for (let km = -Math.floor(halfKm); km <= Math.floor(halfKm); km++) {
+      const major = km % 5 === 0
+      const px = Math.round(kmToPx(km)) + 0.5
+      if (major && Math.abs(km) < halfKm) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'
+        ctx.beginPath()
+        ctx.moveTo(ox + px, oy)
+        ctx.lineTo(ox + px, oy + side)
+        ctx.moveTo(ox, oy + side - px)
+        ctx.lineTo(ox + side, oy + side - px)
+        ctx.stroke()
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)'
+      const len = major ? 6 : 3
+      ctx.beginPath()
+      ctx.moveTo(ox + px, oy + side)
+      ctx.lineTo(ox + px, oy + side + len)
+      ctx.moveTo(ox, oy + side - px)
+      ctx.lineTo(ox - len, oy + side - px)
+      ctx.stroke()
+      if (major) {
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText(String(km), ox + px, oy + side + 9)
+        ctx.textAlign = 'right'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(String(km), ox - 9, oy + side - px)
+      }
+    }
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'top'
+    ctx.fillText('km east of the site', ox + side, oy + side + 24)
+    ctx.save()
+    ctx.translate(ox - 46, oy)
+    ctx.rotate(-Math.PI / 2)
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'top'
+    ctx.fillText('km north', 0, 0)
+    ctx.restore()
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)'
+    ctx.strokeRect(ox + 0.5, oy + 0.5, side - 1, side - 1)
 
     // Named site at the centre
     const [sx, sy] = mid(centreCell(g))
@@ -107,7 +162,7 @@ export default function SunlightMap() {
     if (cell) {
       ctx.strokeStyle = C.text
       ctx.lineWidth = 2
-      ctx.strokeRect(X(cell.col) + 1, Y(cell.row) + 1, cs - 2, cs - 2)
+      ctx.strokeRect(X(cell.col) + 1, Y(cell.row) + 1, X(cell.col + 1) - X(cell.col) - 2, Y(cell.row + 1) - Y(cell.row) - 2)
     }
 
     // The nearest better point: ring, arrow from where we are, and the move in words
@@ -124,73 +179,59 @@ export default function SunlightMap() {
       ctx.beginPath()
       ctx.arc(bx, by, ringR, 0, 7)
       ctx.stroke()
+      const head = (x1: number, y1: number, size: number, spread: number) => {
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x1 - Math.cos(ang - spread) * size, y1 - Math.sin(ang - spread) * size)
+        ctx.lineTo(x1 - Math.cos(ang + spread) * size, y1 - Math.sin(ang + spread) * size)
+        ctx.closePath()
+        ctx.fill()
+      }
       if (len > startGap + ringR + 6) {
-        const x0 = ax + Math.cos(ang) * startGap
-        const y0 = ay + Math.sin(ang) * startGap
         const x1 = bx - Math.cos(ang) * (ringR + 2)
         const y1 = by - Math.sin(ang) * (ringR + 2)
         ctx.beginPath()
-        ctx.moveTo(x0, y0)
+        ctx.moveTo(ax + Math.cos(ang) * startGap, ay + Math.sin(ang) * startGap)
         ctx.lineTo(x1, y1)
         ctx.stroke()
-        ctx.beginPath()
-        ctx.moveTo(x1, y1)
-        ctx.lineTo(x1 - Math.cos(ang - 0.45) * 9, y1 - Math.sin(ang - 0.45) * 9)
-        ctx.lineTo(x1 - Math.cos(ang + 0.45) * 9, y1 - Math.sin(ang + 0.45) * 9)
-        ctx.closePath()
-        ctx.fill()
+        head(x1, y1, 9, 0.45)
       } else {
         // Next-door square: no room for a shaft, so just the arrowhead on the ring.
-        const x1 = bx - Math.cos(ang) * ringR
-        const y1 = by - Math.sin(ang) * ringR
-        ctx.beginPath()
-        ctx.moveTo(x1 + Math.cos(ang) * 5, y1 + Math.sin(ang) * 5)
-        ctx.lineTo(x1 - Math.cos(ang - 0.6) * 7, y1 - Math.sin(ang - 0.6) * 7)
-        ctx.lineTo(x1 - Math.cos(ang + 0.6) * 7, y1 - Math.sin(ang + 0.6) * 7)
-        ctx.closePath()
-        ctx.fill()
+        head(bx - Math.cos(ang) * (ringR - 5), by - Math.sin(ang) * (ringR - 5), 8, 0.6)
       }
       const text = `Move ${better.km.toFixed(1)} km ${better.dir} → +${better.gain_h} h ${B.gain}`
       ctx.font = `500 13px ${FONT}`
       const tw = ctx.measureText(text).width
       const lx = Math.max(ox + 6, Math.min(ox + side - tw - 16, bx - tw / 2 - 5))
-      const ly = by > 44 ? by - ringR - 28 : by + ringR + 8
+      const ly = by - oy > 44 ? by - ringR - 28 : by + ringR + 8
       ctx.fillStyle = 'rgba(9,9,10,0.86)'
-      ctx.beginPath()
-      ctx.roundRect(lx, ly, tw + 12, 22, 5)
-      ctx.fill()
+      ctx.fillRect(lx, ly, tw + 12, 22)
       ctx.fillStyle = C.ok
       ctx.textAlign = 'left'
       ctx.textBaseline = 'middle'
       ctx.fillText(text, lx + 6, ly + 11.5)
     }
 
-    // North and a scale bar
+    // North (up on this map is north at the site)
     ctx.fillStyle = C.text
     ctx.font = `500 12px ${FONT}`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    ctx.fillText('N', ox + side - 16, 8)
+    ctx.fillText('N', ox + side - 16, oy + 8)
     ctx.beginPath()
-    ctx.moveTo(ox + side - 16, 24)
-    ctx.lineTo(ox + side - 20, 32)
-    ctx.lineTo(ox + side - 12, 32)
+    ctx.moveTo(ox + side - 16, oy + 24)
+    ctx.lineTo(ox + side - 20, oy + 32)
+    ctx.lineTo(ox + side - 12, oy + 32)
     ctx.closePath()
     ctx.fill()
-    const km5 = (5000 / g.spacing_m) * cs
-    ctx.fillRect(ox + 10, side - 14, km5, 2)
-    ctx.textAlign = 'left'
-    ctx.textBaseline = 'bottom'
-    ctx.fillText('5 km', ox + 10, side - 18)
   })
 
   const cellAt = (e: React.PointerEvent<HTMLCanvasElement> | React.MouseEvent<HTMLCanvasElement>): Cell | null => {
     if (!g) return null
     const r = e.currentTarget.getBoundingClientRect()
-    const side = Math.min(r.width, r.height)
-    const ox = (r.width - side) / 2
+    const { ox, oy, side } = plotBox(r.width, r.height)
     const col = Math.floor(((e.clientX - r.left - ox) / side) * g.size)
-    const row = Math.floor(((e.clientY - r.top) / side) * g.size)
+    const row = Math.floor(((e.clientY - r.top - oy) / side) * g.size)
     return col >= 0 && row >= 0 && col < g.size && row < g.size ? { col, row } : null
   }
 
@@ -296,11 +337,11 @@ export default function SunlightMap() {
           {mode === 'now' ? (
             <>
               <span><i className="chip" style={{ background: `rgb(${B.rgb})` }} />{body === 'sun' ? 'In sunlight' : 'Earth in view'}</span>
-              <span><i className="chip" style={{ background: '#1d1c1b' }} />Blocked by terrain</span>
+              <span><i className="chip" style={{ background: 'rgb(20,19,18)', boxShadow: 'inset 0 0 0 1px rgb(255 255 255 / 0.25)' }} />Blocked by terrain</span>
             </>
           ) : (
             <span className="w-full">
-              <i className="ramp" style={{ background: `linear-gradient(90deg, #111 0%, #3a3936 50%, rgb(${B.rgb}) 100%)` }} />
+              <i className="ramp" style={{ background: `linear-gradient(90deg, rgb(20,19,18), color-mix(in srgb, rgb(${B.rgb}) 33%, rgb(20,19,18)) 50%, rgb(${B.rgb}))` }} />
               <span className="flex justify-between"><span>0%</span><span>share of the {missionLength}-day mission</span><span>100%</span></span>
             </span>
           )}

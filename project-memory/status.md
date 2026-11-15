@@ -1,11 +1,23 @@
 # Status
 
-## Now (2026-11-15 02:31 UTC)
+## Now (2026-11-15 04:52 UTC)
 **App (branch `claude/vibrant-thompson-kpf3hb`):** intro cinematic, 3D Moon explorer, verdict + countdowns, timeline, slip grid, plan compare, sky view, explain mode, Shadow Vision + nearest better point, **3D LOLA shadow predictor (scope 4, real terrain + real Sun)**. **M3 done: the app runs on real data** (JPL Horizons tracks + LOLA skylines for all 7 sites, October 2028 demo window, `public/data/dataset.json` from `pipeline/build_dataset.py`). **P2 done: the Sunlight map runs on real terrain too**, so nothing in the default view is sample data any more. `?sample` in the URL shows the old synthetic data. The **Backtest panel** (IM-1 + Chandrayaan-3) reads `public/data/backtest.json`. **Presets** (scope 6) and **installable PWA** (scope 7: manifest, original moon icon, service worker; checked offline reload) are done. **Tier C 11 (Survive the night) and 12 (Sky hidden by terrain)** are done (`src/panels/NightSky.tsx`, `src/lib/night.ts`, tested).
 
 **Heads-up on duplicate work:** this file said Claude Code on the laptop was building the 3D LOLA shadow predictor. The Claude Code cloud session has now built and pushed it (details below). If the laptop session also has one in progress, do not merge a second copy; compare and keep one. The laptop session can go straight to the P2 grids.
 
 **Team right now: Osho only** (with Claude in the claude.ai Project and Claude Code on the laptop).
+
+**Zero-scroll desktop application — done 2026-11-15** (Claude Code cloud session, 2026-11-15 04:52 UTC; `src/panels/Shell.tsx`):
+- At 1024 px and wider the app is one fixed screen (`100vw` × `100vh`, no page scroll), divided by 1px hairlines: **top bar** (title, Replay intro, both presets, About the data), **left column** (site list, site title, verdict, the two meters with marginal hours, countdowns, landing date stepper, stay, Pin as plan A), **main stage** with a view switcher strip, and the **timeline docked along the bottom**.
+- Stage views, swapped in place: Moon globe · Shadows on the ground · Sunlight map · The sky · What if we slip? · Backtest on real landings · Survive the night. The view is `view` in the store. The Moon globe stays mounted behind the other views so the intro and camera are never lost.
+- **Shadows on the ground mini-window:** on the globe view, for any site with a terrain tile, a live 3D shadow view sits in the bottom-right corner (hairline border, corner reticles), synced with the timeline, with Expand (opens the full view) and Hide.
+- **About the data** is now a drawer from the top bar (Escape closes it). Presets switch view: IM-1 opens the backtest, Artemis IV returns to the globe.
+- Under 1024 px the same parts stack and the page scrolls; the timeline is fixed to the bottom.
+- The intro still fills the whole window; when it ends the globe eases into the stage and the rest of the interface appears.
+- Checked at 1440×900, 1366×768, 1280×720 and 1024×768: zero page scroll in every view, left column fits without scrolling (even with plan A pinned). A view's own pane scrolls inside itself if its content is taller than the stage; the backtest does at every size tested.
+- Also checked: first-visit intro, replay, keyboard, phone width, offline reload on a second visit. 90 JS tests pass.
+- Removed: `Hero.tsx`, `TimelineBar.tsx`, and the old page-scroll styles (`.hero`, `.timebar`, `.page`, `.band`).
+- Not checked: frame rate with two 3D views at once (globe plus mini-window) on a real GPU. Deck screenshots are now out of date again.
 
 **Interface and honesty pass — done 2026-11-15** (Claude Code cloud session, 2026-11-15 02:31 UTC; eight steps, each tested, checked in the browser, committed and pushed):
 1. **Timeline bar** is fixed to the bottom of the window (`src/panels/TimelineBar.tsx`): no box, fade from black, clicks pass through the fade, and it shows "Site · date" once the first screen has scrolled away. Page padding keeps it off the last section.

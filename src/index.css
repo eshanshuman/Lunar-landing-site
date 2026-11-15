@@ -81,48 +81,6 @@
 }
 
 @layer components {
-  /* ---------- first screen: the Moon ---------- */
-  .hero {
-    position: relative;
-    height: 100vh;
-    min-height: 660px;
-    background: #000;
-    overflow: hidden;
-  }
-  .hero-canvas {
-    position: absolute;
-    inset: 0 0 110px 0;
-    opacity: 0;
-    transition: opacity 1.4s ease;
-  }
-  .hero-canvas.ready {
-    opacity: 1;
-  }
-  .hero-msg.loading {
-    bottom: 110px;
-    color: var(--color-dim);
-    pointer-events: none;
-  }
-  .hero-msg {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    color: var(--color-muted);
-    padding: 24px;
-  }
-  .hero-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 22px 32px;
-    pointer-events: none;
-  }
   .wordmark {
     font-size: 15px;
     font-weight: 600;
@@ -136,20 +94,6 @@
     color: var(--color-text);
     pointer-events: auto;
     cursor: help;
-  }
-  .hero-left {
-    position: absolute;
-    left: 32px;
-    top: 50%;
-    transform: translateY(-58%);
-    width: min(360px, calc(100% - 64px));
-  }
-  .hero-left h1 {
-    font-size: clamp(34px, 3.4vw, 50px);
-    font-weight: 500;
-    line-height: 1.04;
-    letter-spacing: -0.025em;
-    margin-bottom: 14px;
   }
   .verdict {
     display: flex;
@@ -245,13 +189,6 @@
     min-width: 106px;
     text-align: center;
   }
-  .hero-right {
-    position: absolute;
-    right: 32px;
-    top: 50%;
-    transform: translateY(-58%);
-    width: 200px;
-  }
   .group-h {
     font-size: 12px;
     color: var(--color-dim);
@@ -284,50 +221,6 @@
     height: 7px;
     border-radius: 50%;
     flex: none;
-  }
-  /* The timeline: fixed to the bottom of the window, no box, fading up from black. */
-  .timebar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    padding: 44px 32px 14px;
-    background: linear-gradient(to top, #000 65%, transparent);
-    pointer-events: none; /* the fade never blocks what is behind it */
-  }
-  .timebar.pre {
-    visibility: hidden;
-  }
-  .timebar-in {
-    display: flex;
-    align-items: center;
-    gap: 22px;
-    pointer-events: auto;
-  }
-  .timebar-where {
-    flex: none;
-    max-width: 240px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.3;
-    animation: arrive 0.3s both ease-out;
-  }
-  .hero-links {
-    position: absolute;
-    right: 32px;
-    bottom: 124px;
-    display: flex;
-    gap: 22px;
-    font-size: 13px;
-  }
-  .hero-links > * {
-    color: var(--color-dim);
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-  .hero-links > *:hover {
-    color: var(--color-text);
   }
   .delta {
     margin-left: 10px;
@@ -365,25 +258,12 @@
     color: var(--color-text);
     font-weight: 600;
   }
-
-  /* ---------- intro ---------- */
-  .hero.pre .hero-left,
-  .hero.pre .hero-right,
-  .hero.pre .hero-links {
-    visibility: hidden;
-  }
-  /* Full-bleed until the interface arrives; the frame eases up to make room for the timeline during the dive. */
-  .hero.pre .hero-canvas {
-    inset: 0;
-  }
   .pin-label,
   .los-label {
     transition: opacity 0.8s ease;
   }
-  .hero.pre .pin-label,
-  .hero.pre .los-label,
   .pin-label.off,
-  .los-label.off {
+.los-label.off {
     opacity: 0;
   }
   .pin-label.off {
@@ -391,9 +271,6 @@
   }
   .pin-label {
     transition-duration: 0.25s;
-  }
-  .hero-canvas {
-    transition: opacity 1.4s ease, inset 1.2s ease;
   }
   .replay {
     pointer-events: auto;
@@ -424,17 +301,6 @@
     text-shadow: 0 2px 24px #000;
     animation: caption 0.7s both ease-out;
   }
-  .hero.in-intro:not(.pre) .intro-caption {
-    /* once the interface is in, the last caption steps aside for it */
-    left: 50%;
-    right: auto;
-    translate: -50% 0;
-    text-align: center;
-    bottom: 22%;
-    font-size: clamp(20px, 2vw, 28px);
-    max-width: none;
-    color: var(--color-muted);
-  }
   @keyframes caption {
     from {
       opacity: 0;
@@ -443,20 +309,6 @@
 
   /* Motion: one entrance on load, then only in answer to what the user changes. */
   @media (prefers-reduced-motion: no-preference) {
-    /* Starts when the interface is revealed: on load, or part-way through the intro. */
-    .hero:not(.pre) .hero-left,
-    .hero:not(.pre) .hero-right,
-    .hero:not(.pre) .hero-links,
-    .timebar:not(.pre) {
-      animation: arrive 0.9s 0.2s both ease-out;
-    }
-    .hero:not(.pre) .hero-right {
-      animation-delay: 0.4s;
-    }
-    .hero:not(.pre) .hero-links,
-    .timebar:not(.pre) {
-      animation-delay: 0.6s;
-    }
     .swap {
       animation: swap 0.35s both ease-out;
     }
@@ -517,25 +369,6 @@
   }
   .play:hover {
     background: rgb(255 255 255 / 0.08);
-  }
-
-  /* ---------- below the fold ---------- */
-  .page {
-    max-width: 1120px;
-    margin: 0 auto;
-    /* Room for the fixed timeline, so it never covers the last section. */
-    padding: 24px 32px 190px;
-  }
-  .band {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 48px;
-    padding: 56px 0;
-    border-top: 1px solid var(--color-line);
-    align-items: start;
-  }
-  .band:first-child {
-    border-top: 0;
   }
   .card {
     min-width: 0;
@@ -908,58 +741,429 @@
     clip-path: inset(50%);
   }
 
-  @media (max-width: 900px) {
-    .hero {
-      height: auto;
-      min-height: 0;
+  /* ================= application shell =================
+     Desktop: one fixed screen, no page scroll. Zones are divided by hairlines, not boxes.
+     Phone: the same parts stacked, with normal scrolling. */
+  .app {
+    --top: 48px;
+    --strip: 40px;
+    --left: 300px;
+    --bottom: 92px;
+    --hair: 1px solid rgba(255, 255, 255, 0.12);
+    min-height: 100vh;
+    background: #000;
+  }
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: var(--top);
+    padding-left: 18px;
+    border-bottom: var(--hair);
+  }
+  .topbar .wordmark {
+    margin-right: 18px;
+    white-space: nowrap;
+  }
+  .top-gap {
+    flex: 1;
+  }
+  .top-btn {
+    height: var(--top);
+    padding: 0 16px;
+    font-size: 13.5px;
+    color: var(--color-muted);
+    white-space: nowrap;
+    border-left: var(--hair);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .top-btn:hover,
+  .top-btn[aria-expanded='true'] {
+    color: var(--color-text);
+    background: rgb(255 255 255 / 0.07);
+  }
+  .topbar .badge {
+    margin: 0 16px;
+    font-size: 13px;
+  }
+
+  .left {
+    min-height: 0;
+    overflow-y: auto;
+    border-right: var(--hair);
+  }
+  .left-sites {
+    padding: 10px 8px 10px;
+    border-bottom: var(--hair);
+  }
+  .left-sites .site {
+    padding: 3px 10px;
+  }
+  .left-sites .group-h {
+    margin: 8px 0 2px 10px;
+  }
+  .left-sites .group-h:first-child {
+    margin-top: 0;
+  }
+  .left-main {
+    padding: 16px 18px 18px;
+  }
+  .left-main h1 {
+    font-size: 27px;
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .left-main .verdict {
+    font-size: 16px;
+  }
+  .left-main .meter {
+    margin-top: 14px;
+  }
+  .left-main .lede {
+    margin-top: 12px;
+    font-size: 13.5px;
+    max-width: none;
+  }
+  .left-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .left-main .picked {
+    margin: -2px 0 8px;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  /* View switcher: a sharp-edged strip of tabs. The stage swaps in place. */
+  .strip {
+    display: flex;
+    flex: none;
+    height: var(--strip);
+    overflow-x: auto;
+    border-bottom: var(--hair);
+    scrollbar-width: none;
+  }
+  .strip button {
+    flex: none;
+    padding: 0 16px;
+    font-size: 13.5px;
+    color: var(--color-muted);
+    white-space: nowrap;
+    border-right: var(--hair);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .strip button:hover {
+    color: var(--color-text);
+  }
+  .strip button[aria-pressed='true'] {
+    color: var(--color-text);
+    background: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 -2px 0 var(--color-text);
+  }
+  .stage-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+  .view {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    height: 100%;
+    background: var(--color-bg);
+  }
+  .view.one {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .view > * {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px 24px 24px;
+  }
+  .view > * + * {
+    border-left: var(--hair);
+  }
+  .stage-msg {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--color-dim);
+    padding: 24px;
+    pointer-events: none;
+  }
+
+  /* The 3D Moon: always mounted, shown on the globe view. */
+  .globe-layer {
+    background: #000;
+  }
+  .globe-canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+  }
+  .globe-canvas.ready {
+    opacity: 1;
+  }
+  .globe-recentre {
+    position: absolute;
+    left: 16px;
+    bottom: 14px;
+    z-index: 2;
+  }
+
+  /* Picture-in-picture: live "Shadows on the ground" in the corner of the globe. */
+  .pip,
+  .pip-show {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    z-index: 5;
+    background: #000;
+  }
+  .pip {
+    width: 330px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+  .pip-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 10px;
+    border-bottom: var(--hair);
+    font-size: 13px;
+  }
+  .pip-head span {
+    flex: 1;
+  }
+  .pip-body {
+    position: relative;
+    height: 216px;
+  }
+
+  .bottombar {
+    padding: 16px 20px 8px;
+    border-top: var(--hair);
+    background: #000;
+  }
+
+  /* "About the data": a drawer over the right side of the window. */
+  .drawer {
+    position: fixed;
+    top: var(--top);
+    right: 0;
+    bottom: 0;
+    z-index: 35;
+    width: min(620px, 100vw);
+    overflow-y: auto;
+    padding: 22px 28px 40px;
+    background: var(--color-bg);
+    border-left: var(--hair);
+  }
+  .drawer-close {
+    float: right;
+  }
+
+  /* Intro: until the interface is revealed only the globe shows, across the whole window. */
+  .intro-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+  }
+  .app.pre .topbar,
+  .app.pre .left,
+  .app.pre .strip,
+  .app.pre .bottombar,
+  .app.pre .view,
+  .app.pre .globe-recentre {
+    visibility: hidden;
+  }
+  .app.pre .globe-layer {
+    position: fixed;
+    inset: 0;
+    height: auto;
+    z-index: 30;
+  }
+  .app.pre .pin-label,
+  .app.pre .los-label {
+    opacity: 0;
+  }
+  .app.in-intro:not(.pre) .intro-caption {
+    /* once the interface is in, the last caption steps aside for it */
+    left: 50%;
+    right: auto;
+    translate: -50% 0;
+    text-align: center;
+    bottom: 22%;
+    font-size: clamp(20px, 2vw, 28px);
+    max-width: none;
+    color: var(--color-muted);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .app:not(.pre) .topbar,
+    .app:not(.pre) .left,
+    .app:not(.pre) .strip,
+    .app:not(.pre) .bottombar {
+      animation: arrive 0.8s 0.15s both ease-out;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: var(--left) minmax(0, 1fr);
+      grid-template-rows: var(--top) minmax(0, 1fr) var(--bottom);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .topbar {
+      grid-column: 1 / -1;
+      flex-wrap: nowrap;
+    }
+    .bottombar {
+      grid-column: 1 / -1;
+    }
+    /* Fixed to the stage's rectangle so it can ease there from full-window at the end of the intro. */
+    .globe-layer {
+      position: fixed;
+      inset: calc(var(--top) + var(--strip)) 0 var(--bottom) var(--left);
+      z-index: 1;
+      transition: inset 1.2s ease;
+    }
+    .globe-layer.off {
+      visibility: hidden;
+    }
+    .terrain-view {
+      height: clamp(220px, calc(100vh - 420px), 900px);
+    }
+  }
+  @media (max-width: 1023.98px) {
+    .app {
+      padding-bottom: 96px; /* room for the docked timeline */
+    }
+    .topbar {
+      padding: 6px 12px;
+    }
+    .top-btn {
+      height: 34px;
+      border-left: 0;
+      padding: 0 10px;
+    }
+    .left {
+      border-right: 0;
+      border-bottom: var(--hair);
       overflow: visible;
     }
-    .hero-canvas {
+    .globe-layer {
       position: relative;
-      inset: auto;
       height: 62vh;
     }
-    .hero-top {
-      padding: 16px 20px;
-    }
-    .hero-left,
-    .hero-right {
-      position: static;
-      transform: none;
-      width: auto;
-      padding: 8px 20px 20px;
-    }
-    .hero-right {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px 4px;
-    }
-    .hero-right .site {
-      width: auto;
-    }
-    .hero-right .group-h {
-      width: 100%;
-    }
-    .timebar {
-      padding: 36px 16px 10px;
-    }
-    .timebar-where {
+    .globe-layer.off {
       display: none;
     }
-    .hero-links {
-      display: none;
+    .view {
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
     }
-    .hero-msg.loading {
-      bottom: auto;
-      height: 62vh;
+    .view > * {
+      overflow: visible;
+      padding: 20px 16px;
     }
-    .page {
-      padding: 0 20px 170px;
+    .view > * + * {
+      border-left: 0;
+      border-top: var(--hair);
     }
-    .band {
-      grid-template-columns: 1fr;
-      gap: 28px;
-      padding: 40px 0;
+    .bottombar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      padding: 12px 12px 6px;
+    }
+    .pip {
+      width: 210px;
+    }
+    .pip-body {
+      height: 140px;
+    }
+    .drawer {
+      top: 0;
+    }
+  }
+
+  /* Short desktop windows: tighten the left column so everything in it stays on screen. */
+  @media (min-width: 1024px) and (max-height: 840px) {
+    .left-sites {
+      padding: 6px 8px;
+    }
+    .left-sites .site {
+      padding: 1px 10px;
+      font-size: 13px;
+    }
+    .left-sites .group-h {
+      margin: 5px 0 1px 10px;
+      font-size: 11.5px;
+    }
+    .left-main {
+      padding: 10px 16px 12px;
+    }
+    .left-main h1 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+    .left-main .verdict {
+      font-size: 15px;
+    }
+    .left-main .meter {
+      margin-top: 9px;
+    }
+    .left-main .meter-head b {
+      font-size: 26px;
+    }
+    .left-main .meter-note {
+      margin-top: 3px;
+      font-size: 12px;
+    }
+    .left-main .lede {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .left-field {
+      margin-top: 7px;
+    }
+    .left-main .stepper button {
+      height: 27px;
+    }
+    .left-main select {
+      padding: 3px 10px;
+    }
+    .left-main .controls.plan {
+      margin-top: 8px;
+    }
+    .left-main .btn {
+      padding: 4px 12px;
     }
   }
 }

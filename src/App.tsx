@@ -1,16 +1,6 @@
 import { useEffect } from 'react'
 import { useStore } from './state/store'
-import Hero from './panels/Hero'
-import SkyView from './panels/SkyView'
-import SlipGrid from './panels/SlipGrid'
-import SunlightMap from './panels/SunlightMap'
-import TerrainPanel from './panels/TerrainPanel'
-import TimelineBar from './panels/TimelineBar'
-import ScenarioDiff from './panels/ScenarioDiff'
-import Explain from './panels/Explain'
-import DataNote from './panels/DataNote'
-import Backtest from './panels/Backtest'
-import { NightPlanner, SkyBlocked } from './panels/NightSky'
+import Shell from './panels/Shell'
 
 /** Space = play/pause, ←/→ = step hours, ↑/↓ = change site (PLAN.md §8). */
 function useKeyboard() {
@@ -43,40 +33,5 @@ function useKeyboard() {
 
 export default function App() {
   useKeyboard()
-  return (
-    <>
-      <Hero />
-      <main className="page">
-        <div className="band">
-          <TerrainPanel />
-        </div>
-        <div className="band">
-          <SunlightMap />
-        </div>
-        <div className="band">
-          <SlipGrid />
-          <ScenarioDiff />
-        </div>
-        <div className="band">
-          <Backtest />
-        </div>
-        <div className="band">
-          <SkyView />
-          <Explain />
-        </div>
-        <div className="band">
-          <NightPlanner />
-          <SkyBlocked />
-        </div>
-        <div className="band">
-          <DataNote />
-          <section className="card aside">
-            <h2>Keyboard</h2>
-            <p className="note">Space plays or pauses. Left and right arrows step one hour. Up and down arrows change site.</p>
-          </section>
-        </div>
-      </main>
-      <TimelineBar />
-    </>
-  )
+  return <Shell />
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { dataset, gridFor, gridSource, gridStatus, siteById } from '../data/dataset'
 import { pct } from '../lib/format'
 import { bit, cellOffset, centreCell, nearestBetter, pointIndex, visibleHours } from '../lib/grid'
@@ -8,7 +8,17 @@ import { useStore } from '../state/store'
 import type { Cell, GridData } from '../types'
 import { useCanvas } from './useCanvas'
 
-const SIZE = 560
+/** Canvas height: on a desktop window the map has to fit the fixed stage, so it follows the window's height. */
+function useMapSize() {
+  const pick = () => (window.innerWidth >= 1024 ? Math.max(300, Math.min(640, window.innerHeight - 330)) : 440)
+  const [size, setSize] = useState(pick)
+  useEffect(() => {
+    const on = () => setSize(pick())
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [])
+  return size
+}
 /** Room around the map for the km ticks and labels. */
 const PAD = { l: 54, r: 10, t: 10, b: 40 }
 /** The square the map is drawn in, inside a canvas of w x h CSS pixels. */
@@ -50,6 +60,7 @@ export default function SunlightMap() {
   const missionLength = useStore((s) => s.missionLength)
   const t = useStore((s) => s.t)
   const setCell = useStore((s) => s.setCell)
+  const SIZE = useMapSize()
   const [mode, setMode] = useState<'now' | 'mission'>('mission')
   const [body, setBody] = useState<Body>('sun')
   const [hover, setHover] = useState<Cell | null>(null)

@@ -120,11 +120,11 @@ export default function TerrainPanel() {
         {heading}
         <div className="terrain-view">
           {webgl ? (
-            <Suspense fallback={<div className="hero-msg">Loading the 3D view…</div>}>
+            <Suspense fallback={<div className="stage-msg">Loading the 3D view…</div>}>
               <TerrainScene tile={tile} sky={sky} exaggeration={exaggeration} fill={fill} />
             </Suspense>
           ) : (
-            <div className="hero-msg">This view needs WebGL, which this browser is not providing.</div>
+            <div className="stage-msg">This view needs WebGL, which this browser is not providing.</div>
           )}
           <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
           {exaggeration !== 1 && <div className="terrain-flag">Heights exaggerated {exaggeration}×. Shadows are not to scale.</div>}

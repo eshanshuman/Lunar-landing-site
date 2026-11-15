@@ -44,7 +44,8 @@ src/data/                  sample.ts and sampleGrid.ts (synthetic), dataset.ts (
 src/lib/grid.ts            Sunlight-map bits, hours per point, nearest better point (unit-tested)
 src/lib/visibility.ts      skyline interpolation, window stats, rise/set countdowns (unit-tested)
 src/state/store.ts         Zustand: site, landingDay, missionLength, t, pinA
-src/panels/                hero, timeline, sunlight map, slip grid, sky view, scenario diff, why, data notes
+src/panels/Shell.tsx       application shell: top bar, left column, view switcher, stage, shadows mini-window, docked timeline
+src/panels/                the stage views: sunlight map, slip grid, sky view, backtest, night planner, data notes
 src/scenes/Moon/           3D Moon explorer (geo.ts holds the lat/lon and sky-direction maths, unit-tested)
 src/scenes/Terrain/        3D shadow view: real terrain tile, shadow-mapped Sun, lander with Sun/Earth lines
 src/lib/terrainShadow.ts   tile heights, line of sight inside a tile, tile-vs-skyline comparison (unit-tested)

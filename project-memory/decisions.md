@@ -38,3 +38,7 @@
 - 2026-11-15: Each panel keeps one short honesty line on screen and moves the longer method and caveat text into a "Method and sources" fold-out. Nothing was deleted; the fold-outs hold the full wording.
 - 2026-11-15: The 3D view's fill light is off by default and labelled as a visual aid when on. It only raises ambient light; shadow mapping and the tile-vs-skyline verdict are untouched.
 - 2026-11-15: Controls use a 2px radius (was fully rounded). The Sunlight map's hover tooltip was replaced by a readout line under the map.
+- 2026-11-15: Desktop layout is a fixed, zero-scroll application (top bar, left column, stage with a view switcher, docked timeline) divided by hairlines. This replaces "the Moon fills the first screen and panels sit below the fold". Phones keep a stacked, scrolling layout.
+- 2026-11-15: The globe view carries a live "Shadows on the ground" mini-window for sites that have a terrain tile; Expand opens the full view, Hide dismisses it until shown again.
+- 2026-11-15: "About the data" moved from the page into a drawer opened from the top bar. Presets now switch the stage view instead of scrolling the page.
+- 2026-11-15: If a view is taller than the stage on a small window, its pane scrolls inside itself; the page never scrolls on desktop.

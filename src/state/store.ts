@@ -5,6 +5,18 @@ import { PRESETS } from '../data/presets'
 import type { Cell } from '../types'
 import { introSeen, markIntroSeen, prefersReducedMotion } from '../scenes/Intro/introState'
 
+/** The views the main stage can show, in the order of the switcher strip. */
+export const VIEWS = [
+  ['globe', 'Moon globe'],
+  ['terrain', 'Shadows on the ground'],
+  ['map', 'Sunlight map'],
+  ['sky', 'The sky'],
+  ['slip', 'What if we slip?'],
+  ['backtest', 'Backtest on real landings'],
+  ['night', 'Survive the night'],
+] as const
+export type View = (typeof VIEWS)[number][0]
+
 export interface Pin {
   site: string
   cell: Cell | null
@@ -30,6 +42,12 @@ interface State {
   speed: number
   /** Mission shown in the backtest panel (index into backtest.json). */
   backtestPick: number
+  /** Which view fills the main stage. */
+  view: View
+  /** The "About the data" drawer is open. */
+  aboutOpen: boolean
+  /** The small "Shadows on the ground" window on the globe has been hidden by the user. */
+  pipHidden: boolean
   /** Site under the pointer in the site list, so the 3D pin can light up. */
   hoverSite: string | null
   /** Goes up each time a Sunlight-map grid finishes loading, so views that read grids redraw. */
@@ -58,7 +76,10 @@ interface State {
   pin: () => void
   unpin: () => void
   setBacktestPick: (i: number) => void
-  /** Load a demo preset; returns the element id to scroll to, if any. */
+  setView: (view: View) => void
+  setAboutOpen: (open: boolean) => void
+  setPipHidden: (hidden: boolean) => void
+  /** Load a demo preset and switch to the view that shows it. Returns the panel id for a backtest, else null. */
   loadPreset: (id: string) => string | null
 }
 
@@ -79,6 +100,9 @@ export const useStore = create<State>((set) => ({
   hoverSite: null,
   gridTick: 0,
   backtestPick: 0,
+  view: 'globe',
+  aboutOpen: false,
+  pipHidden: false,
   intro: playIntro,
   introTime: 0,
   revealed: !playIntro,
@@ -115,14 +139,17 @@ export const useStore = create<State>((set) => ({
   pin: () => set((s) => ({ pinA: { site: s.site, cell: s.cell, landingDay: s.landingDay, missionLength: s.missionLength } })),
   unpin: () => set({ pinA: null }),
   setBacktestPick: (backtestPick) => set({ backtestPick }),
+  setView: (view) => set({ view }),
+  setAboutOpen: (aboutOpen) => set({ aboutOpen }),
+  setPipHidden: (pipHidden) => set({ pipHidden }),
   loadPreset: (id) => {
     const p = PRESETS.find((x) => x.id === id)
     if (!p) return null
     if (p.kind === 'backtest') {
-      set({ backtestPick: p.mission })
+      set({ backtestPick: p.mission, view: 'backtest' })
       return 'backtest'
     }
-    set({ site: p.site, cell: null, landingDay: p.landingDay, missionLength: p.missionLength, t: 0, playing: false })
+    set({ site: p.site, cell: null, landingDay: p.landingDay, missionLength: p.missionLength, t: 0, playing: false, view: 'globe' })
     return null
   },
 }))

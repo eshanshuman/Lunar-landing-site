@@ -72,10 +72,7 @@ export default function TerrainPanel() {
       Shadows on the ground
       <span className="tag-real">Terrain: real LOLA</span>
       {sample && <span className="tag-sample">Sun and Earth: sample data</span>}
-      <span className="sub">
-        The 20 km around {name} from NASA's LOLA elevation model, lit from where the Sun is at the time on the timeline.
-        Play the timeline and the shadows move.
-      </span>
+      <span className="sub">Real terrain around {name}, lit from where the Sun is at the timeline's time.</span>
     </h2>
   )
 
@@ -129,6 +126,7 @@ export default function TerrainPanel() {
           ) : (
             <div className="hero-msg">This view needs WebGL, which this browser is not providing.</div>
           )}
+          <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
           {exaggeration !== 1 && <div className="terrain-flag">Heights exaggerated {exaggeration}×. Shadows are not to scale.</div>}
         </div>
         <p className={`terrain-now ${status.cls}`} aria-live="polite">
@@ -151,31 +149,23 @@ export default function TerrainPanel() {
             </button>
           ))}
         </div>
-        <p className="note mt-3">
-          {exaggeration === 1
-            ? 'Heights and distances are drawn to the same scale, so the shadows are the real geometry.'
-            : `Heights are stretched ${exaggeration}× to make the relief easier to see. The shadows you see are then longer or shorter than the real ones. The verdict below the view is not affected.`}
-        </p>
+        {exaggeration !== 1 && (
+          <p className="note mt-3">Heights stretched {exaggeration}×: the shadows drawn are not the real lengths. The verdict is not affected.</p>
+        )}
 
         <h2 className="mt-7">Shadow detail</h2>
         <button className="btn" aria-pressed={fill} onClick={() => setFill((f) => !f)}>
           Shadow detail (visual aid): {fill ? 'on' : 'off'}
         </button>
-        <p className="note mt-3">
-          {fill
-            ? 'Faint fill light added as a visual aid; the shadow edges and the verdict are unchanged.'
-            : 'Off: ground in shadow is drawn almost black, as it would be with no air to scatter light.'}
-        </p>
+        {fill && <p className="note mt-3">Faint fill light added as a visual aid; the shadow edges and the verdict are unchanged.</p>}
 
-        <h2 className="mt-7">What this view can and cannot show</h2>
+        <h2 className="mt-7">Lander, hour by hour</h2>
         <p className="note">
-          Shadows here are cast only by terrain inside this 20 km square. Whether the lander is lit is decided separately,
-          from the full skyline out to 150 km. Near the pole the Sun is so low that a ridge 100 km away can block it, and
-          this view cannot draw that.
+          Shadows drawn here come only from this 20 km tile. The verdict uses the full 150 km skyline.
         </p>
         {counts && (
           <>
-            <p className="note mt-3">Over this {missionLength}-day mission, hour by hour at the lander:</p>
+            <p className="note mt-3">Over this {missionLength}-day mission:</p>
             <div className="diff-row"><span>In sunlight</span><span className="d">{counts.lit} h</span></div>
             <div className="diff-row"><span>Shadow from terrain in this tile</span><span className="d">{counts.near} h</span></div>
             <div className="diff-row"><span>Shadow from a far ridge beyond it</span><span className="d">{counts.far} h</span></div>
@@ -189,6 +179,27 @@ export default function TerrainPanel() {
             sky. They become a real check when the pipeline data lands.
           </p>
         )}
+        <details className="sources">
+          <summary>Method and sources</summary>
+          <ul>
+            <li>
+              Terrain: the 20 km around {name} from NASA's LOLA elevation model ({tile.meta.dem}), averaged to{' '}
+              {Math.round(tile.meta.size_m / tile.meta.px)} m per pixel. The ground curves away from the site as the Moon does.
+            </li>
+            <li>Light: one Sun direction for the whole tile, from JPL Horizons at the time on the timeline. Play the timeline and the shadows move.</li>
+            <li>
+              Shadows here are cast only by terrain inside this 20 km square. Whether the lander is lit is decided
+              separately, from the full skyline out to 150 km. Near the pole the Sun is so low that a ridge 100 km away
+              can block it, and this view cannot draw that. When that happens the line under the view says so.
+            </li>
+            <li>
+              True scale draws heights and distances alike, so the shadows are the real geometry. Stretching heights makes
+              the relief easier to see but changes the shadow lengths.
+            </li>
+            <li>With the fill light off, ground in shadow is drawn almost black, as it would be with no air to scatter light.</li>
+            <li>"Tile and skyline disagree" counts hours when the tile alone blocks the Sun but the skyline does not. It should be zero.</li>
+          </ul>
+        </details>
       </section>
     </>
   )

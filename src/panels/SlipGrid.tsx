@@ -24,9 +24,7 @@ export default function SlipGrid() {
     <section className="card" id="slip">
       <h2>
         What if we slip?
-        <span className="sub">
-          Every site against every landing date, for a {missionLength}-day mission. Pick a square to load it.
-        </span>
+        <span className="sub">Every site against every landing date. Pick a square to load it.</span>
       </h2>
       {/* Scrolls sideways on narrow screens instead of widening the page. Padding keeps the selection outline unclipped. */}
       <div className="-m-1 overflow-x-auto p-1">
@@ -84,6 +82,18 @@ export default function SlipGrid() {
         <span><span className="sw g1" />One falls short</span>
         <span><span className="sw g0" />Both fall short</span>
       </div>
+      <details className="sources">
+        <summary>Method and sources</summary>
+        <ul>
+          <li>Each square is one {missionLength}-day mission starting at 00:00 UTC on that landing day.</li>
+          <li>
+            Green: the Sun and Earth are each in view for at least 75% of the hours. Hatched: one of them falls short.
+            Red: both do. In view means the centre of the disc is above the terrain skyline.
+          </li>
+          <li>The 75% line is this tool's own threshold for comparing options. It is not a mission requirement.</li>
+          <li>Same data as the rest of the page: JPL Horizons positions against LOLA skylines, hour by hour.</li>
+        </ul>
+      </details>
       <Tooltip tip={tip} />
     </section>
   )

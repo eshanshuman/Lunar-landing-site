@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react'
 import { dataset, gridFor, gridSource, gridStatus, siteById } from '../data/dataset'
-import { fmtDur, pct } from '../lib/format'
-import { bit, centreCell, describeMove, nearestBetter, pointIndex, visibleHours } from '../lib/grid'
+import { pct } from '../lib/format'
+import { bit, cellOffset, centreCell, nearestBetter, pointIndex, visibleHours } from '../lib/grid'
 import { C, FONT } from '../lib/theme'
 import { OK_FRACTION, windowStats, type Body } from '../lib/visibility'
 import { useStore } from '../state/store'
 import type { Cell, GridData } from '../types'
-import Tooltip, { type TipState } from './Tooltip'
 import { useCanvas } from './useCanvas'
 
 const SIZE = 560
@@ -53,7 +52,7 @@ export default function SunlightMap() {
   const setCell = useStore((s) => s.setCell)
   const [mode, setMode] = useState<'now' | 'mission'>('mission')
   const [body, setBody] = useState<Body>('sun')
-  const [tip, setTip] = useState<TipState | null>(null)
+  const [hover, setHover] = useState<Cell | null>(null)
 
   const gridTick = useStore((s) => s.gridTick)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,6 +144,15 @@ export default function SunlightMap() {
     ctx.restore()
     ctx.strokeStyle = 'rgba(255,255,255,0.28)'
     ctx.strokeRect(ox + 0.5, oy + 0.5, side - 1, side - 1)
+    // Corner reticle ticks, just outside the frame
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'
+    for (const [cx, cy, dx, dy] of [[ox, oy, -1, -1], [ox + side, oy, 1, -1], [ox, oy + side, -1, 1], [ox + side, oy + side, 1, 1]] as const) {
+      ctx.beginPath()
+      ctx.moveTo(cx + dx * 4.5, cy - dy * 5)
+      ctx.lineTo(cx + dx * 4.5, cy + dy * 4.5)
+      ctx.lineTo(cx - dx * 5, cy + dy * 4.5)
+      ctx.stroke()
+    }
 
     // Named site at the centre
     const [sx, sy] = mid(centreCell(g))
@@ -243,10 +251,7 @@ export default function SunlightMap() {
       ) : (
         <span className="tag-real">Real LOLA terrain, 80 m</span>
       )}
-      <span className="sub">
-        The 20 km around {name}, one square every 500 m. A short move can change how much {B.word} a lander gets.
-        Pick a square to try that point.
-      </span>
+      <span className="sub">How much {B.word} each spot within 10 km of {name} gets. Pick a square to try it.</span>
     </h2>
   )
 
@@ -289,29 +294,27 @@ export default function SunlightMap() {
             const c = cellAt(e)
             if (c) setCell(c)
           }}
-          onPointerMove={(e) => {
-            const c = e.pointerType === 'mouse' ? cellAt(e) : null
-            if (!c) return setTip(null)
-            const p = pointIndex(g, c)
-            const m = describeMove(g, c)
-            const now = bit(g, body, p, Math.min(s0 + t, g.hours - 1))
-            setTip({
-              x: e.clientX,
-              y: e.clientY,
-              content: (
-                <>
-                  <b>{m.km === 0 ? name : `${m.km.toFixed(1)} km ${m.dir} of ${name}`}</b>
-                  <br />
-                  {hours[p]} h of {n} h with {B.word} ({pct(hours[p] / n)}%)
-                  <br />
-                  Right now: {now ? 'in view' : 'blocked by terrain'}
-                </>
-              ),
-            })
-          }}
-          onPointerLeave={() => setTip(null)}
+          onPointerMove={(e) => setHover(e.pointerType === 'mouse' ? cellAt(e) : null)}
+          onPointerLeave={() => setHover(null)}
         />
-        <Tooltip tip={tip} />
+        <p className="readout" aria-hidden="true">
+          {hover ? (
+            (() => {
+              const p = pointIndex(g, hover)
+              const o = cellOffset(g, hover)
+              const now = bit(g, body, p, Math.min(s0 + t, g.hours - 1))
+              const km = (m: number, pos: string, neg: string) => `${Math.abs(m / 1000).toFixed(1)} km ${m >= 0 ? pos : neg}`
+              return (
+                <>
+                  <b>{km(o.east_m, 'east', 'west')}</b>, <b>{km(o.north_m, 'north', 'south')}</b> of the site ·{' '}
+                  <b>{hours[p]} h</b> of {n} h with {B.word} ({pct(hours[p] / n)}%) · right now {now ? 'in view' : 'blocked'}
+                </>
+              )
+            })()
+          ) : (
+            'Move over the map to read a square.'
+          )}
+        </p>
       </section>
 
       <section className="card aside">
@@ -346,22 +349,13 @@ export default function SunlightMap() {
             </span>
           )}
         </div>
-        <p className="note mt-3">
-          {mode === 'now' ? 'Follows the timeline: play it to watch the shadows move.' : `From landing day, ${n} hours.`}
-        </p>
 
         {gridSource === 'pipeline' && (
           <p className="note mt-3">
-            <b>Coarser than the verdict.</b> Every square here is worked out from 80 m terrain; the verdict at the top of
-            the page uses 20 m terrain for the site itself. For this mission the map gives {name} {centreHours} h of{' '}
-            {B.word} and the 20 m skyline gives {siteHours} h.
-            {agree !== undefined && agree !== null && (
-              <>
-                {' '}
-                Over the whole data window the two agree in {pct(agree)}% of hours at this site.
-                {agree < 0.99 && ' Small gains suggested here are within that margin, so treat them with caution.'}
-              </>
-            )}
+            <b>Coarser than the verdict.</b> The map gives {name} {centreHours} h of {B.word}; the verdict's finer skyline
+            gives {siteHours} h.
+            {agree !== undefined && agree !== null && <> Over all the data they agree in {pct(agree)}% of hours here.</>}
+            {agree !== undefined && agree !== null && agree < 0.99 && ' Treat small gains with caution.'}
           </p>
         )}
 
@@ -375,8 +369,8 @@ export default function SunlightMap() {
               Move {better.km.toFixed(1)} km {better.dir} → +{better.gain_h} h {B.gain}
             </p>
             <p className="note">
-              That is {fmtDur(better.gain_h)} more over the mission, {hours[pointIndex(g, better)]} h in all. It is the
-              closest square that {refHours < Math.ceil(OK_FRACTION * n) && hours[pointIndex(g, better)] >= Math.ceil(OK_FRACTION * n)
+              {hours[pointIndex(g, better)]} h in all: the closest square that{' '}
+              {refHours < Math.ceil(OK_FRACTION * n) && hours[pointIndex(g, better)] >= Math.ceil(OK_FRACTION * n)
                 ? `reaches ${pct(OK_FRACTION)}%`
                 : 'gains at least 12 hours'}.
             </p>
@@ -401,6 +395,31 @@ export default function SunlightMap() {
             )}
           </>
         )}
+        <details className="sources">
+          <summary>Method and sources</summary>
+          <ul>
+            <li>
+              The 20 km around {name}: {g.size} × {g.size} squares, one every {g.spacing_m} m. A short move can change how
+              much {B.word} a lander gets.
+            </li>
+            <li>
+              Each square has its own skyline, traced out to 150 km on {gridSource === 'sample' ? 'sample terrain' : g.meta.dem}, and
+              is checked against the Sun and Earth directions hour by hour. "Whole mission" counts the {n} hours from
+              landing; "Right now" follows the timeline.
+            </li>
+            <li>
+              Every square here is worked out from 80 m terrain; the verdict at the top of the page uses 20 m terrain for
+              the site itself. Coarser terrain smooths small ridges away, so the two can differ for the same spot. Small
+              gains suggested by the map are within that margin.
+            </li>
+            <li>
+              Nearest better point: if this spot is under {pct(OK_FRACTION)}%, the closest square that reaches it;
+              otherwise the closest square that gains at least 12 hours. The 12 hours is this tool's own cut-off.
+            </li>
+            <li>A picked square keeps the site's Sun and Earth directions and has no skyline of its own, so the sky view still shows the site's.</li>
+            <li>Brightness follows the relief only slightly; colour is the share of hours in view.</li>
+          </ul>
+        </details>
       </section>
     </>
   )

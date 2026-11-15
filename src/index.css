@@ -853,6 +853,29 @@
   .facts dd {
     color: var(--color-muted);
   }
+  /* Live readout under a chart: what is under the pointer, from the loaded data. */
+  .readout {
+    min-height: 22px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--color-dim);
+  }
+  .readout b {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+  /* Corner reticle ticks around the 3D view. */
+  .corner {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border: 0 solid rgb(255 255 255 / 0.7);
+    pointer-events: none;
+  }
+  .corner.tl { left: -6px; top: -6px; border-left-width: 1px; border-top-width: 1px; }
+  .corner.tr { right: -6px; top: -6px; border-right-width: 1px; border-top-width: 1px; }
+  .corner.bl { left: -6px; bottom: -6px; border-left-width: 1px; border-bottom-width: 1px; }
+  .corner.br { right: -6px; bottom: -6px; border-right-width: 1px; border-bottom-width: 1px; }
   .sources {
     margin-top: 14px;
     font-size: 14px;

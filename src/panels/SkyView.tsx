@@ -1,7 +1,8 @@
+import { useRef, useState } from 'react'
 import { dayMs, siteById } from '../data/dataset'
-import { fmtDate } from '../lib/format'
+import { compass, fmtDate } from '../lib/format'
 import { C, FONT } from '../lib/theme'
-import { DISC_RADIUS_DEG, isMarginal, isVisible, type Body } from '../lib/visibility'
+import { DISC_RADIUS_DEG, horizonAt, isMarginal, isVisible, type Body } from '../lib/visibility'
 import { useSiteData, useStore } from '../state/store'
 import { useCanvas } from './useCanvas'
 
@@ -14,6 +15,9 @@ export default function SkyView() {
   const t = useStore((s) => s.t)
   const d = useSiteData()
   const picked = !!d.vis
+  // Where the chart sits inside its canvas, saved by the last draw so the pointer can be read back as a direction.
+  const geom = useRef<{ L: number; T: number; pw: number; ph: number; lo: number; hi: number } | null>(null)
+  const [read, setRead] = useState<{ az: number; el: number } | null>(null)
 
   const ref = useCanvas(280, (g, w, h) => {
     const hor = d.horizon_deg
@@ -38,6 +42,7 @@ export default function SkyView() {
     const L = 36, R = 10, T = 12, B = 26
     const pw = w - L - R
     const ph = h - T - B
+    geom.current = { L, T, pw, ph, lo, hi }
     const X = (az: number) => L + (az / 360) * pw
     const Y = (el: number) => T + ((hi - el) / (hi - lo)) * ph
 
@@ -134,12 +139,34 @@ export default function SkyView() {
     <section className="card">
       <h2>
         The sky from {siteById(site).name}
-        <span className="sub">
-          Looking all the way round the horizon. The Sun and Earth trace these paths over the {missionLength}-day mission
-          from {fmtDate(dayMs(landingDay))}; where a path dips behind the terrain, it is blocked.
-        </span>
+        <span className="sub">The whole horizon, with the Sun's and Earth's paths over the mission.</span>
       </h2>
-      <canvas ref={ref} style={{ height: 280 }} role="img" aria-label="Sky view: terrain skyline with Sun and Earth paths" />
+      <canvas
+        ref={ref}
+        style={{ height: 280, cursor: 'crosshair' }}
+        role="img"
+        aria-label="Sky view: terrain skyline with Sun and Earth paths"
+        onPointerMove={(e) => {
+          const q = geom.current
+          if (!q) return
+          const r = e.currentTarget.getBoundingClientRect()
+          const x = e.clientX - r.left - q.L
+          const y = e.clientY - r.top - q.T
+          if (x < 0 || x > q.pw || y < 0 || y > q.ph) return setRead(null)
+          setRead({ az: (x / q.pw) * 360, el: q.hi - (y / q.ph) * (q.hi - q.lo) })
+        }}
+        onPointerLeave={() => setRead(null)}
+      />
+      <p className="readout" aria-hidden="true">
+        {read ? (
+          <>
+            Azimuth <b>{read.az.toFixed(1)}°</b> ({compass(read.az)}) · elevation <b>{read.el.toFixed(2)}°</b> · skyline in that
+            direction <b>{horizonAt(d.horizon_deg, read.az).toFixed(2)}°</b>
+          </>
+        ) : (
+          'Move over the chart to read a direction.'
+        )}
+      </p>
       <div className="legend">
         <span><i style={{ background: 'var(--color-sun)' }} />Sun path, visible</span>
         <span><i style={{ background: 'var(--color-earth)' }} />Earth path, visible</span>
@@ -152,8 +179,25 @@ export default function SkyView() {
             the dotted stretches show when it is blocked there.
           </span>
         )}
-        <span className="w-full text-dim">Height is stretched so small angles are visible. There is no atmosphere to bend the light.</span>
+        <span className="w-full text-dim">Height is stretched so small angles show.</span>
       </div>
+      <details className="sources">
+        <summary>Method and sources</summary>
+        <ul>
+          <li>
+            The chart looks all the way round the horizon. The Sun and Earth trace these paths over the {missionLength}-day
+            mission from {fmtDate(dayMs(landingDay))}; where a path dips behind the terrain, it is blocked.
+          </li>
+          <li>Height is stretched so small angles are visible. There is no atmosphere to bend the light.</li>
+          <li>
+            The Sun and Earth are drawn at their real sizes in the sky ({(2 * DISC_RADIUS_DEG.sun).toFixed(2)}° and{' '}
+            {(2 * DISC_RADIUS_DEG.earth).toFixed(1)}° across). A lighter stretch of path means the disc is partly behind
+            the skyline: its centre is within one disc radius of the terrain.
+          </li>
+          <li>In view or blocked is decided by the centre of the disc, once per hour.</li>
+          <li>Skyline: {d.meta.dem}. Positions: {d.meta.ephemeris}.</li>
+        </ul>
+      </details>
     </section>
   )
 }

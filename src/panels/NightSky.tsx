@@ -27,10 +27,7 @@ export function NightPlanner() {
     <section className="card" id="night">
       <h2>
         Survive the night
-        <span className="sub">
-          How long the Sun stays behind the terrain at {siteById(site).name}, and the battery that would carry your
-          lander through it. You enter the power; the darkness comes from the data.
-        </span>
+        <span className="sub">The longest stretch without the Sun at {siteById(site).name}, and the battery to get through it.</span>
       </h2>
 
       <div className="diff-row">
@@ -85,11 +82,19 @@ export function NightPlanner() {
         <p className="note mt-4">Enter your lander&rsquo;s standby power to get the battery size. We don&rsquo;t assume one.</p>
       )}
 
-      <p className="note mt-3 text-dim">
-        Dark means the Sun&rsquo;s centre is behind the terrain, hour by hour, from JPL Horizons and the LOLA skyline. This
-        is energy only: it ignores battery temperature, ageing, depth of discharge and any power from a low Sun at the edge.
-        Landing {fmtDT(dayMs(landingDay)).slice(0, 10)}; data covers {dataset.days} landing dates plus the longest mission.
-      </p>
+      <p className="note mt-3">Energy only. You enter the power; the darkness comes from the data.</p>
+      <details className="sources">
+        <summary>Method and sources</summary>
+        <ul>
+          <li>Dark means the Sun&rsquo;s centre is behind the terrain, hour by hour, from JPL Horizons and the LOLA skyline.</li>
+          <li>
+            This is energy only: it ignores battery temperature, ageing, depth of discharge and any power from a low Sun at
+            the edge.
+          </li>
+          <li>Battery = the power you enter × the hours of darkness, plus your margin. No power figure is assumed.</li>
+          <li>Landing {fmtDT(dayMs(landingDay)).slice(0, 10)}; data covers {dataset.days} landing dates plus the longest mission.</li>
+        </ul>
+      </details>
     </section>
   )
 }
@@ -109,10 +114,14 @@ export function SkyBlocked() {
         of the sky above {siteById(site).name}&rsquo;s horizontal is hidden behind the skyline. The highest ridge stands{' '}
         {max.toFixed(1)}° up, toward azimuth {Math.round(maxAz)}°.
       </p>
-      <p className="note mt-3 text-dim">
-        Geometry only, from the LOLA skyline. It says how much sky the terrain covers, not what that means for radiation or
-        heat.
-      </p>
+      <p className="note mt-3">Geometry only. It says nothing about radiation or heat.</p>
+      <details className="sources">
+        <summary>Method and sources</summary>
+        <ul>
+          <li>From the LOLA skyline in 720 directions: the share of the dome above the horizontal that lies below the skyline.</li>
+          <li>It says how much sky the terrain covers, not what that means for radiation or heat.</li>
+        </ul>
+      </details>
     </section>
   )
 }

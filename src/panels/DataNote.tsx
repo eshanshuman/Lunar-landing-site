@@ -107,7 +107,7 @@ export default function DataNote() {
         budgets, thermal limits, slopes, hazards and relays are not modelled.
       </p>
       <details className="sources">
-        <summary>Sources and status</summary>
+        <summary>Method and sources</summary>
         <ul>
           <li>Sun and Earth positions: {sample ? 'synthetic (sample view).' : 'JPL Horizons API, observer table for a surface site on the Moon, airless apparent azimuth and elevation.'}</li>
           <li>
